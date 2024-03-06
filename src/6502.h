@@ -1,3 +1,5 @@
+#pragma once
+
 extern void reset6502();
  /*   - Call this once before you begin execution.    */
  

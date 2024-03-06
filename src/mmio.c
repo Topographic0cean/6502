@@ -3,15 +3,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "ram.h"
 #include "mmio.h"
 
 #define LED_LIGHTS 0
 #define LCD_DISPLAY 1
 
-#define LCD_PORTB 0xB000
-#define LCD_PORTA 0xB001
-#define LCD_DDRB 0xB002
-#define LCD_DDRA 0xB003
+#define LCD_PORTB (MMIO_START + 0)
+#define LCD_PORTA (MMIO_START + 1)
+#define LCD_DDRB (MMIO_START + 2)
+#define LCD_DDRA (MMIO_START + 3)
 
 #define LCD_E 0x80
 #define LCD_RW 0x40
@@ -35,7 +36,7 @@ uint8_t bits;
 uint8_t lines;
 
 #define FONT5_10 1
-#define FONT5_8  2
+#define FONT5_8 2
 uint8_t font;
 
 char LCD[2][16];
@@ -61,14 +62,15 @@ void mmio_led_lights(uint16_t address, uint8_t value)
                 bits[i] = ' ';
         }
         bits[8] = '\0';
-        printf("\r%s", bits);
+        printf("\033[2J");
+        printf("%s", bits);
+        fflush(stdout);
         break;
     }
 }
 
 void mmio_read_data()
 {
-    printf("Read data: %x\n", data);
 }
 
 void mmio_write_data()
@@ -76,7 +78,11 @@ void mmio_write_data()
     LCD[0][cursor] = data;
     cursor++;
     LCD[0][cursor] = '\0';
-    printf("\r%s", LCD[0]);
+    printf("\033[2J");
+    fflush(stdout);
+    printf("%s\n", LCD[0]);
+    printf("%s\n", LCD[1]);
+    fflush(stdout);
 }
 
 void mmio_read_instruction()
@@ -122,7 +128,8 @@ void mmio_return_home()
 }
 void mmio_clear()
 {
-    printf("clear\n");
+    line = 0;
+    cursor = 0;
 }
 
 void mmio_write_instruction()
@@ -199,7 +206,7 @@ void mmio_lcd_display(uint16_t address, uint8_t value)
 
 void mmio_write(uint16_t address, uint8_t value)
 {
-    if (address >= 0xB000 && address <= 0xBFFF)
+    if (address >= MMIO_START && address <= MMIO_END)
     {
         if (LED_LIGHTS)
             mmio_led_lights(address, value);
