@@ -75,7 +75,7 @@
  *     count of clock ticks.                         *
  *                                                   *
  * void step6502()                                   *
- *   - Execute a single instrution.                  *
+ *   - Execute a single instruction.                  *
  *                                                   *
  * void irq6502()                                    *
  *   - Trigger a hardware IRQ in the 6502 core.      *

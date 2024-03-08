@@ -1,9 +1,9 @@
-EXE = run
+EXE = emulate6502
 
 CC = gcc
 LD = gcc
 
-CFLAGS = 
+CFLAGS =  -g
 LDFLAGS = 
 LDLIBS = 
 
@@ -34,7 +34,7 @@ LINK.o = $(LD) $(LDFLAGS) $(LDLIBS) $(OBJECTS) -o $@
 all: $(BIN)/$(EXE) rom.bin
 
 rom.bin: $(ROM)/rom.asm
-	vasm -Fbin -dotdir -o $(OBJ)/rom.bin $(ROM)/rom.asm
+	vasm -Fbin -dotdir -o rom.bin $(ROM)/rom.asm
 
 $(BIN)/$(EXE): $(SRC) $(OBJ) $(BIN) $(OBJECTS)
 	$(LINK.o)

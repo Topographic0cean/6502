@@ -1,7 +1,10 @@
 DISPLAY   = $0200
 HEAP      = $0300
+CLOCK     = $0400 ; 2 bytes
 MMIO      = $7000
-ROM_START = $8000
+ROM       = $8000
+VECTORS   = $FFFA
+
 
 PORTB = MMIO
 PORTA = (MMIO+1)
@@ -15,21 +18,27 @@ RS = %00100000
   .org $0
   .word $0000
 
-  .org $200
-  .asciiz "Hello, world!"
+  .org DISPLAY
+  .word 0000
 
-  .org $300
-  .word 1729
+  .org HEAP
+  .word 0000
 
-  .org ROM_START
+  .org CLOCK
+  .word 0000
 
-setup_stack:
+  .org ROM
+reset:
   ldx #$ff
   txs
-
+  cli
   jsr display_setup
-  jsr display_string
 
+infinite_loop:
+  lda CLOCK
+  sta HEAP
+  lda CLOCK + 1
+  sta HEAP + 1
   jsr hextodec
   ldx #$ff
 strcpy_loop:
@@ -38,13 +47,20 @@ strcpy_loop:
   sta $200, x
   bne strcpy_loop
   jsr display_string
-
-infinite_loop:
   jmp infinite_loop
 
   .include "display.asm
   .include "hextodec.asm
-  
-  .org $fffc
-  .word ROM_START
-  .word $0000
+
+nmi:
+irq:
+  inc CLOCK
+  bne vector_exit
+  inc CLOCK + 1
+vector_exit:
+  rti
+
+  .org VECTORS
+  .word nmi
+  .word reset
+  .word irq

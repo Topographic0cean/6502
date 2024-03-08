@@ -5,7 +5,7 @@
 #include "mmio.h"
 
 static FILE* ilog = NULL;
-static char RAM[0xFFFF];
+static char RAM[0x10000];
 
 void ram_init(char* filename) {
     ilog = fopen("instructions.log","w");
@@ -16,8 +16,8 @@ void ram_init(char* filename) {
         fprintf(stderr, "Error: Could not open ram.bin\n");
         exit(1);
     }
-    size_t result = fread(RAM, 1, 0xFFFF, file);
-    if (result != 0xFFFF) {
+    size_t result = fread(RAM, 1, 0x10000, file);
+    if (result != 0x10000) {
         fprintf(stderr, "Error: Could not read ram.bin\n");
         exit(1);
     }
@@ -51,6 +51,7 @@ void write6502(uint16_t address, uint8_t value)
 
 void dump_core()
 {
+    printf("dumping core\n");
     FILE* f = fopen("core.bin", "wb");
     if (f == NULL) {
         perror("fopen");
