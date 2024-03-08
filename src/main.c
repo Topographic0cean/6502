@@ -8,6 +8,8 @@
 #include "ram.h"
 #include "mmio.h"
 
+
+
 int main(int argc, char *argv[])
 {
     char* file = argv[1];
@@ -21,7 +23,9 @@ int main(int argc, char *argv[])
     reset6502();
     for (int c = 0; c < clocks; c++) {
         exec6502(clocks);
-        nanosleep(&asleep, NULL);
+        if (sleep_time > 0)
+            nanosleep(&asleep, NULL);
     }
+    dump_core();
     exit(0);
 }

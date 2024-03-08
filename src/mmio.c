@@ -87,7 +87,7 @@ void mmio_write_data()
 
 void mmio_read_instruction()
 {
-    printf("Read instruction: %x\n", data);
+    write6502(LCD_PORTB, 0);
 }
 void mmio_set_ddram_address()
 {

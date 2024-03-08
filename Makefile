@@ -11,6 +11,7 @@ LDLIBS =
 BIN = bin
 OBJ = obj
 SRC = src
+ROM = rom
 
 SOURCES := $(wildcard $(SRC)/*.c $(SRC)/*.cc $(SRC)/*.cpp $(SRC)/*.cxx)
 
@@ -30,10 +31,10 @@ LINK.o = $(LD) $(LDFLAGS) $(LDLIBS) $(OBJECTS) -o $@
 .DEFAULT_GOAL = all
 
 .PHONY: all
-all: $(BIN)/$(EXE) ram.bin
+all: $(BIN)/$(EXE) rom.bin
 
-ram.bin: ram.asm
-	vasm -Fbin -dotdir -o $(OBJ)/ram.bin ram.asm
+rom.bin: $(ROM)/rom.asm
+	vasm -Fbin -dotdir -o $(OBJ)/rom.bin $(ROM)/rom.asm
 
 $(BIN)/$(EXE): $(SRC) $(OBJ) $(BIN) $(OBJECTS)
 	$(LINK.o)
@@ -50,20 +51,16 @@ $(BIN):
 $(OBJ)/%.o:	$(SRC)/%.c
 	$(COMPILE.c) $<
 
-# force rebuild
-.PHONY: remake
-remake:	clean $(BIN)/$(EXE)
-
 # execute the program
 .PHONY: run
 run: $(BIN)/$(EXE)
-	./$(BIN)/$(EXE) $(OBJ)/ram.bin 100 0
+	./$(BIN)/$(EXE) $(OBJ)/rom.bin 50 10
 
 .PHONY: clean
 clean:
 	$(RM) -r $(OBJ)
 	$(RM) -r $(BIN)
-	$(RM) *.log
+	$(RM) *.log *.bin
 
 -include $(DEPENDS)
 

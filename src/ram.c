@@ -4,8 +4,6 @@
 
 #include "mmio.h"
 
-
-
 static FILE* ilog = NULL;
 static char RAM[0xFFFF];
 
@@ -49,4 +47,15 @@ void write6502(uint16_t address, uint8_t value)
         fprintf(ilog,"%4x W %2x\n", address, value);
     RAM[address] = value;
     mmio_write(address, value);
+}
+
+void dump_core()
+{
+    FILE* f = fopen("core.bin", "wb");
+    if (f == NULL) {
+        perror("fopen");
+        exit(1);
+    }
+    fwrite(RAM, 1, 0x10000, f);
+    fclose(f);
 }

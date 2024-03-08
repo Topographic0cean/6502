@@ -3,7 +3,10 @@
 /* RAM Layout
 0x0000 - 0x00FF: Zero Page
 0x0100 - 0x01FF: Stack
-0x0200 - 0x6FFF: RAM
+0x0200 - 0x02FF: Reserved for display.
+0x0300 - 0x030a: Reserved for hex2dec
+
+0x0400 - 0x6FFF: Free RAM
 0x7000 - 0x7FFF: MMIO
 0x8000 - 0xFFF9: ROM
 0xFFFA - 0xFFFB: NMI Vector
@@ -27,3 +30,4 @@ extern void ram_init(char* filename);
 extern void ram_fill(uint8_t size, uint16_t reset_vector);
 extern uint8_t read6502(uint16_t address);
 extern void write6502(uint16_t address, uint8_t value);
+extern void dump_core();
