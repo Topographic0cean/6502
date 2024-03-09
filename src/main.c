@@ -3,58 +3,137 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <popt.h>
 
 #include "6502.h"
 #include "ram.h"
 #include "mmio.h"
 
+typedef struct options
+{
+    char *rom;
+    int clocks;
+    int sleep;
+    int instructions;
+    int io;
+    int core;
+} Options;
+
+struct poptOption optionsTable[] = {
+    {"rom", 'r', POPT_ARG_STRING, 0, 'r', "ROM file to load", "file"},
+    {"clocks", 'c', POPT_ARG_INT, 0, 'c', "Number of clocks to run", "clocks"},
+    {"sleep", 's', POPT_ARG_INT, 0, 's', "Sleep time between clocks", "nanoseconds"},
+    {"instructions", 'i', POPT_ARG_NONE, 0, 'i', "Print instructions", NULL},
+    {"io", 'o', POPT_ARG_NONE, 0, 'o', "Print IO", NULL},
+    {"core", 'e', POPT_ARG_NONE, 0, 'e', "Dump core at end.", NULL},
+    POPT_AUTOHELP{NULL, 0, 0, NULL, 0}};
+
+static int nmi = 0;
+static int irq = 0;
+static int done = 0;
+
+void process_options(int argc, const char **argv, Options *options)
+{
+    int c;
+
+    options->rom = "rom.bin";
+    options->clocks = 0;
+    options->sleep = 0;
+    options->instructions = 0;
+    options->io = 0;
+    options->core = 0;
+
+    poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+    while ((c = poptGetNextOpt(optCon)) >= 0)
+    {
+        switch (c)
+        {
+        case 'r':
+            options->rom = poptGetOptArg(optCon);
+            break;
+        case 'c':
+            options->clocks = atoi(poptGetOptArg(optCon));
+            break;
+        case 's':
+            options->sleep = atoi(poptGetOptArg(optCon));
+            break;
+        case 'i':
+            options->instructions = 1;
+            break;
+        case 'o':
+            options->io = 1;
+            break;
+        case 'e':
+            options->core = 1;
+            break;
+        }
+    }
+    poptFreeContext(optCon);
+}
+
 void nmi_interrupt(int signum)
 {
-    printf("nmi\n");
-    nmi6502();
+    nmi = 1;
 }
 
 void maskable_interrupt(int signum)
 {
-    irq6502();
+    irq = 1;
 }
 
 void quit(int signum)
 {
-    exit(0);
+    done = 1;
 }
 
 void setup_interrupt_handlers()
 {
-    signal(SIGABRT, nmi_interrupt);
+    signal(SIGUSR2, nmi_interrupt);
     signal(SIGINT, quit);
-    signal(SIGTERM, maskable_interrupt);
-    signal(SIGSEGV, dump_core);
+    signal(SIGUSR1, maskable_interrupt);
+    signal(SIGINFO, dump_core);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
-    char *file = argv[1];
-    int clocks = atoi(argv[2]);
-    int sleep_time = atoi(argv[3]);
-    struct timespec asleep = {0, sleep_time*1000000};
-    if (sleep_time == 0) {
+    struct timespec asleep;
+    Options options;
+
+    process_options(argc, argv, &options);
+
+    asleep.tv_sec = 0;
+    asleep.tv_nsec = options.sleep;
+    if (options.sleep == 0)
+    {
         asleep.tv_nsec = 1;
     }
 
     setup_interrupt_handlers();
-    ram_init(argv[1]);
-    mmio_init();
+    ram_init(options.rom,options.instructions);
+    mmio_init(options.io);
     reset6502();
 
     int c = 0;
-    while (clocks == 0 || c < clocks)
+    while (options.clocks == 0 || c < options.clocks)
     {
+        if (nmi == 1){
+            nmi6502();
+            nmi = 0;
+        }
+        if (irq == 1){
+            irq6502();
+            irq = 0;
+        }
+        if (done == 1){
+            break;
+        }
         step6502();
-        if (sleep_time > 0)
+        if (options.sleep > 0)
             nanosleep(&asleep, NULL);
         c++;
     }
+    if (options.core == 1)
+        dump_core();
 
     exit(0);
 }

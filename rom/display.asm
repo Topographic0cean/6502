@@ -13,10 +13,18 @@ display_setup:
   jsr toggle_execute
   rts
 
+display_clear:
+  lda #%00000001
+  jsr toggle_execute
+  rts
+
+display_home
+  lda #%00000010
+  jsr toggle_execute
+  rts
+
 display_string:
     ; displays the string stored at display_string_buffer
-  lda #%00000001; clear display
-  jsr toggle_execute
   ldx #$00
 loop:
   lda DISPLAY, x

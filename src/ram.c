@@ -7,18 +7,19 @@
 static FILE* ilog = NULL;
 static char RAM[0x10000];
 
-void ram_init(char* filename) {
-    ilog = fopen("instructions.log","w");
+void ram_init(char* filename, int instruction_log) {
+    if (instruction_log)
+        ilog = fopen("instructions.log","w");
 
     // read the binary file ram.bin into RAM
     FILE *file = fopen(filename, "rb");
     if (file == NULL) {
-        fprintf(stderr, "Error: Could not open ram.bin\n");
+        fprintf(stderr, "Error: Could not open %s\n",filename);
         exit(1);
     }
     size_t result = fread(RAM, 1, 0x10000, file);
     if (result != 0x10000) {
-        fprintf(stderr, "Error: Could not read ram.bin\n");
+        fprintf(stderr, "Error: Could not read %s\n",filename);
         exit(1);
     }
     fclose(file);

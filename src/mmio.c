@@ -33,19 +33,39 @@ static uint8_t status = 0;
 
 uint8_t bits;
 
-uint8_t lines;
 
 #define FONT5_10 1
 #define FONT5_8 2
 uint8_t font;
 
-char LCD[2][16];
+#define MAX_LINES 2
+#define MAX_CHARS 16
+char LCD[MAX_LINES][MAX_CHARS+1];
+uint8_t lines = MAX_LINES;
 uint8_t line = 0;
 uint8_t cursor = 0;
 
-void mmio_init()
+
+void mmio_clear_display(){
+    for (int i = 0; i < MAX_LINES; i++)
+    {
+        for (int j = 0; j < MAX_CHARS; j++)
+        {
+            LCD[i][j] = ' ';
+        }
+        LCD[i][MAX_CHARS] = '\0';
+    }
+    cursor = 0;
+    line = 0;
+}
+
+void mmio_init(int io_log)
 {
-    iolog = fopen("mmio.log", "w");
+    if (io_log)
+    {
+        iolog = fopen("mmio.log", "w");
+    }
+    mmio_clear_display();
 }
 
 void mmio_led_lights(uint16_t address, uint8_t value)
@@ -75,11 +95,16 @@ void mmio_read_data()
 
 void mmio_write_data()
 {
-    LCD[0][cursor] = data;
+    LCD[line][cursor] = data;
     cursor++;
-    LCD[0][cursor] = '\0';
+    if (cursor >= MAX_CHARS) {
+        cursor = 0;
+        line++;
+        if (line >= lines) {
+            line = 0;
+        }
+    }
     printf("\033[2J");
-    fflush(stdout);
     printf("%s\n", LCD[0]);
     printf("%s\n", LCD[1]);
     fflush(stdout);
@@ -124,12 +149,8 @@ void mmio_mode_set()
 }
 void mmio_return_home()
 {
-    printf("return home\n");
-}
-void mmio_clear()
-{
-    line = 0;
     cursor = 0;
+    line = 0;
 }
 
 void mmio_write_instruction()
@@ -149,7 +170,7 @@ void mmio_write_instruction()
     else if (data & 0x02)
         mmio_return_home();
     else if (data & 0x01)
-        mmio_clear();
+        mmio_clear_display();
     else
         fprintf(stderr, "mmio no op %d\n", data);
 }
@@ -186,19 +207,15 @@ void mmio_lcd_display(uint16_t address, uint8_t value)
     switch (address)
     {
     case LCD_PORTA:
-        fprintf(iolog, "LCD_PORTA: %x\n", value);
         mmio_lcd_status(value);
         break;
     case LCD_PORTB:
-        fprintf(iolog, "LCD_PORTB: %x\n", value);
         data = value;
         break;
     case LCD_DDRA:
-        fprintf(iolog, "LCD_DDRA: %x\n", value);
         ddra = value;
         break;
     case LCD_DDRB:
-        fprintf(iolog, "LCD_DDRB: %x\n", value);
         ddrb = value;
         break;
     }

@@ -35,10 +35,12 @@ reset:
   jsr display_setup
 
 infinite_loop:
+  sei
   lda CLOCK
   sta HEAP
   lda CLOCK + 1
   sta HEAP + 1
+  cli
   jsr hextodec
   ldx #$ff
 strcpy_loop:
@@ -46,6 +48,7 @@ strcpy_loop:
   lda $304, x
   sta $200, x
   bne strcpy_loop
+  jsr display_home
   jsr display_string
   jmp infinite_loop
 

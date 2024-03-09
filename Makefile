@@ -5,7 +5,7 @@ LD = gcc
 
 CFLAGS =  -g
 LDFLAGS = 
-LDLIBS = 
+LDLIBS = -lpopt
 
 # build directories
 BIN = bin
