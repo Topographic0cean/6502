@@ -7,7 +7,8 @@
 
 #include "6502.h"
 #include "ram.h"
-#include "mmio.h"
+#include "w65c22.h"
+#include "display.h"
 
 typedef struct options
 {
@@ -17,6 +18,7 @@ typedef struct options
     int instructions;
     int io;
     int core;
+    int verbose;
 } Options;
 
 struct poptOption optionsTable[] = {
@@ -26,6 +28,7 @@ struct poptOption optionsTable[] = {
     {"instructions", 'i', POPT_ARG_NONE, 0, 'i', "Print instructions", NULL},
     {"io", 'o', POPT_ARG_NONE, 0, 'o', "Print IO", NULL},
     {"core", 'e', POPT_ARG_NONE, 0, 'e', "Dump core at end.", NULL},
+    {"verbose", 'v', POPT_ARG_NONE, 0, 'v', "Verbose", NULL},
     POPT_AUTOHELP{NULL, 0, 0, NULL, 0}};
 
 static int nmi = 0;
@@ -38,10 +41,11 @@ void process_options(int argc, const char **argv, Options *options)
 
     options->rom = "rom.bin";
     options->clocks = 0;
-    options->sleep = 0;
+    options->sleep = 1;
     options->instructions = 0;
     options->io = 0;
     options->core = 0;
+    options->verbose = 0;
 
     poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
     while ((c = poptGetNextOpt(optCon)) >= 0)
@@ -65,6 +69,9 @@ void process_options(int argc, const char **argv, Options *options)
             break;
         case 'e':
             options->core = 1;
+            break;
+        case 'v':
+            options->verbose = 1;
             break;
         }
     }
@@ -94,6 +101,15 @@ void setup_interrupt_handlers()
     signal(SIGINFO, dump_core);
 }
 
+void initialize( Options* options)
+{
+    setup_interrupt_handlers();
+    ram_init(options->rom, options->instructions);
+    w65c22_init(options->verbose);
+    display_init(options->io);
+    reset6502();
+}
+
 int main(int argc, const char *argv[])
 {
     struct timespec asleep;
@@ -108,23 +124,23 @@ int main(int argc, const char *argv[])
         asleep.tv_nsec = 1;
     }
 
-    setup_interrupt_handlers();
-    ram_init(options.rom,options.instructions);
-    mmio_init(options.io);
-    reset6502();
+    initialize(&options);
 
     int c = 0;
     while (options.clocks == 0 || c < options.clocks)
     {
-        if (nmi == 1){
+        if (nmi == 1)
+        {
             nmi6502();
             nmi = 0;
         }
-        if (irq == 1){
+        if (irq == 1)
+        {
             irq6502();
             irq = 0;
         }
-        if (done == 1){
+        if (done == 1)
+        {
             break;
         }
         step6502();

@@ -2,59 +2,49 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "mmio.h"
+#include "decoder.h"
+#include "ram.h"
 
-static FILE* ilog = NULL;
-static char RAM[0x10000];
+static FILE *ilog = NULL;
+static char RAM[ROM_END + 1];
 
-void ram_init(char* filename, int instruction_log) {
+void ram_init(char *filename, int instruction_log)
+{
     if (instruction_log)
-        ilog = fopen("instructions.log","w");
+        ilog = fopen("instructions.log", "w");
 
     // read the binary file ram.bin into RAM
     FILE *file = fopen(filename, "rb");
-    if (file == NULL) {
-        fprintf(stderr, "Error: Could not open %s\n",filename);
+    if (file == NULL)
+    {
+        fprintf(stderr, "Error: Could not open %s\n", filename);
         exit(1);
     }
     size_t result = fread(RAM, 1, 0x10000, file);
-    if (result != 0x10000) {
-        fprintf(stderr, "Error: Could not read %s\n",filename);
+    if (result != 0x10000)
+    {
+        fprintf(stderr, "Error: Could not read %s\n", filename);
         exit(1);
     }
     fclose(file);
 }
 
-uint8_t read6502(uint16_t address)
+void ram_write(uint16_t address, uint8_t value)
 {
-    if (address < 0 || address > 0xFFFF) {
-        fprintf(stderr,"READ: invalid memory address: %4x\n", address);
-        exit(1);
-    }
-
-    uint8_t result = RAM[address];
-    if (ilog != NULL)
-        fprintf(ilog,"%4x r %2x\n", address, result);
-    return result;
+    RAM[address] = value;
 }
 
-void write6502(uint16_t address, uint8_t value)
+uint8_t ram_read(uint16_t address)
 {
-    if (address < 0 || address > 0xFFFF) {
-        fprintf(stderr,"WRITE: invalid memory address: %4x\n", address);
-        exit(1);
-    }
-    if (ilog != NULL)
-        fprintf(ilog,"%4x W %2x\n", address, value);
-    RAM[address] = value;
-    mmio_write(address, value);
+    return RAM[address];
 }
 
 void dump_core()
 {
     printf("dumping core\n");
-    FILE* f = fopen("core.bin", "wb");
-    if (f == NULL) {
+    FILE *f = fopen("core.bin", "wb");
+    if (f == NULL)
+    {
         perror("fopen");
         exit(1);
     }

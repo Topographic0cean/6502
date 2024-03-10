@@ -31,10 +31,14 @@ LINK.o = $(LD) $(LDFLAGS) $(LDLIBS) $(OBJECTS) -o $@
 .DEFAULT_GOAL = all
 
 .PHONY: all
-all: $(BIN)/$(EXE) rom.bin
+all: $(BIN)/$(EXE) rom.bin test.bin
 
 rom.bin: $(ROM)/rom.asm
 	vasm -Fbin -dotdir -o rom.bin $(ROM)/rom.asm
+
+test.bin: $(ROM)/test.asm
+	vasm -Fbin -dotdir -o test.bin $(ROM)/test.asm
+
 
 $(BIN)/$(EXE): $(SRC) $(OBJ) $(BIN) $(OBJECTS)
 	$(LINK.o)
