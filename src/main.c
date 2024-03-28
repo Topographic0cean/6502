@@ -98,7 +98,7 @@ void setup_interrupt_handlers()
     signal(SIGUSR2, nmi_interrupt);
     signal(SIGINT, quit);
     signal(SIGUSR1, maskable_interrupt);
-    signal(SIGINFO, dump_core);
+    signal(SIGABRT, dump_core);
 }
 
 void initialize( Options* options)

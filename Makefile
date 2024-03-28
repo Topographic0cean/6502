@@ -26,7 +26,7 @@ DEPENDS := $(OBJECTS:.o=.d)
 
 # compile C source
 COMPILE.c = $(CC) $(DEPFLAGS) $(CFLAGS) $(CPPFLAGS) -c -o $@
-LINK.o = $(LD) $(LDFLAGS) $(LDLIBS) $(OBJECTS) -o $@
+LINK.o = $(LD) $(LDFLAGS)  $(OBJECTS) -o $@ $(LDLIBS)
 
 .DEFAULT_GOAL = all
 
