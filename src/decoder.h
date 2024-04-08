@@ -8,8 +8,10 @@
 
 0x0400 - 0x6FFF: Free RAM
 0x7000 - 0x7FFF: MMIO
-    0x7000 - 0x7003: W65C22
+    0111 0000 0001 0000 
+    0x7010 - 0x7013:        MMIO1 W65C22
         Addressing bits 0-3 are used to select the register
+    
 0x8000 - 0xFFF9: ROM
 0xFFFA - 0xFFFB: NMI Vector
 0xFFFC - 0xFFFD: Reset Vector

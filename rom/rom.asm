@@ -1,7 +1,7 @@
 DISPLAY   = $0200
 HEAP      = $0300
 CLOCK     = $0400 ; 2 bytes
-MMIO      = $7000
+MMIO      = $7010
 ROM       = $8000
 VECTORS   = $FFFA
 

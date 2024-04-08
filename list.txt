@@ -1,0 +1,207 @@
+Sections:
+00: "org0001:8000" (8000-80B0)
+01: "org0002:fffa" (FFFA-0)
+
+
+Source: "hardware/test_display.asm"
+                        	     1: DISPLAY   = $0200
+                        	     2: HEAP      = $0300
+                        	     3: CLOCK     = $0400 ; 2 bytes
+                        	     4: MMIO      = $7010
+                        	     5: ROM       = $8000
+                        	     6: VECTORS   = $FFFA
+                        	     7: 
+                        	     8: PORTB = MMIO      ; data
+                        	     9: PORTA = (MMIO+1)  ; control
+                        	    10: DDRB = (MMIO+2)
+                        	    11: DDRA = (MMIO+3)
+                        	    12: 
+                        	    13: E  = %10000000
+                        	    14: RW = %01000000
+                        	    15: RS = %00100000
+                        	    16: 
+                        	    17: D8B2L5B8  = %00111000   ; Set Diplay to 8-bit mode, 2 lines and 5x8
+                        	    18: DONCURSOR = %00001110   ; Display on, cursor on, blink off
+                        	    19: DMODE     = %00000110   ; left to right, no display shift
+                        	    20: 
+                        	    21:   .org ROM
+                        	    22: 
+                        	    23: reset:
+00:8000 A2FF            	    24:   ldx #$ff
+00:8002 9A              	    25:   txs
+00:8003 58              	    26:   cli
+00:8004 201B80          	    27:   jsr display_setup
+00:8007 203580          	    28:   jsr display_clear
+                        	    29: 
+00:800A A200            	    30:   ldx #0
+                        	    31: print:
+00:800C BDA280          	    32:   lda msg,x
+00:800F F007            	    33:   beq loop
+00:8011 205080          	    34:   jsr display_putc
+00:8014 E8              	    35:   inx
+00:8015 4C0C80          	    36:   jmp print
+                        	    37: 
+                        	    38: loop:
+00:8018 4C1880          	    39:   jmp loop
+                        	    40: 
+                        	    41:   .include "../rom/display.asm
+
+Source: "../rom/display.asm"
+                        	     1: 
+                        	     2: display_setup:      
+                        	     3:     ; setup the display to 8 bits 2 lines
+00:801B A9FF            	     4:   lda #%11111111  ; all output
+00:801D 8D1270          	     5:   sta DDRB        
+00:8020 A9FF            	     6:   lda #%11111111  ; all output
+00:8022 8D1370          	     7:   sta DDRA        
+00:8025 A938            	     8:   lda #%00111000  ; 8-bit mode 2 line display 5x8 font
+00:8027 208980          	     9:   jsr toggle_execute
+00:802A A90E            	    10:   lda #%00001110  ; display on; cursor on; blink off
+00:802C 208980          	    11:   jsr toggle_execute
+00:802F A906            	    12:   lda #%00000110  ; inc and shift cursor; no display shift
+00:8031 208980          	    13:   jsr toggle_execute
+00:8034 60              	    14:   rts
+                        	    15: 
+                        	    16: display_clear:
+00:8035 A901            	    17:   lda #%00000001
+00:8037 208980          	    18:   jsr toggle_execute
+00:803A 60              	    19:   rts
+                        	    20: 
+                        	    21: display_home:
+00:803B A902            	    22:   lda #%00000010
+00:803D 208980          	    23:   jsr toggle_execute
+00:8040 60              	    24:   rts
+                        	    25: 
+                        	    26: display_string:
+                        	    27:     ; displays the string stored at display_string_buffer
+00:8041 A200            	    28:   ldx #$00
+                        	    29: display_loop:
+00:8043 BD0002          	    30:   lda DISPLAY, x
+00:8046 F007            	    31:   beq display_done
+00:8048 205080          	    32:   jsr display_putc
+00:804B E8              	    33:   inx
+00:804C 4C4380          	    34:   jmp display_loop
+                        	    35: display_done:
+00:804F 60              	    36:   rts
+                        	    37: 
+                        	    38: display_putc:
+00:8050 48              	    39:   pha
+00:8051 206880          	    40:   jsr wait_lcd
+00:8054 68              	    41:   pla
+00:8055 8D1070          	    42:   sta PORTB       
+00:8058 A920            	    43:   lda #RS          ; set register select and toggle execute
+00:805A 8D1170          	    44:   sta PORTA
+00:805D A9A0            	    45:   lda #(RS | E)
+00:805F 8D1170          	    46:   sta PORTA
+00:8062 A900            	    47:   lda #0
+00:8064 8D1170          	    48:   sta PORTA
+00:8067 60              	    49:   rts
+                        	    50: 
+                        	    51: wait_lcd:
+00:8068 A900            	    52:   lda #%0000000  ; all output
+00:806A 8D1270          	    53:   sta DDRB   
+                        	    54: display_busy:     
+00:806D A940            	    55:   lda #RW
+00:806F 8D1170          	    56:   sta PORTA
+00:8072 A9C0            	    57:   lda #(RW | E)
+00:8074 8D1170          	    58:   sta PORTA
+00:8077 AD1070          	    59:   lda PORTB
+00:807A 2980            	    60:   and #%10000000
+00:807C D0EF            	    61:   bne display_busy
+00:807E A940            	    62:   lda #RW
+00:8080 8D1170          	    63:   sta PORTA
+00:8083 A9FF            	    64:   lda #%11111111  ; all output
+00:8085 8D1270          	    65:   sta DDRB        
+00:8088 60              	    66:   rts
+                        	    67: 
+                        	    68: toggle_execute:
+00:8089 48              	    69:   pha
+00:808A 206880          	    70:   jsr wait_lcd
+00:808D 68              	    71:   pla
+00:808E 8D1070          	    72:   sta PORTB       
+00:8091 A900            	    73:   lda #0
+00:8093 8D1170          	    74:   sta PORTA
+00:8096 A980            	    75:   lda #E
+00:8098 8D1170          	    76:   sta PORTA
+00:809B A900            	    77:   lda #0
+00:809D 8D1170          	    78:   sta PORTA
+00:80A0 60              	    79:   rts
+                        	    80: 
+
+Source: "hardware/test_display.asm"
+                        	    42: 
+                        	    43: nmi:
+                        	    44: irq:
+                        	    45: vector_exit:
+00:80A1 40              	    46:   rti
+                        	    47: 
+00:80A2 48656C6C6F2C2077	    48: msg: .asciiz "Hello, world!"
+00:80AA 6F726C6421
+00:80AF 00
+                        	    49: 
+                        	    50:   .org VECTORS
+01:FFFA A180            	    51:   .word nmi
+01:FFFC 0080            	    52:   .word reset
+01:FFFE A180            	    53:   .word irq
+                        	    54: 
+
+
+Symbols by name:
+DDRA                             E:7013
+DDRB                             E:7012
+DISPLAY                          E:0200
+E                                E:0080
+MMIO                             E:7010
+PORTA                            E:7011
+PORTB                            E:7010
+ROM                              E:8000
+RS                               E:0020
+RW                               E:0040
+VECTORS                          E:FFFA
+display_busy                     A:806D
+display_clear                    A:8035
+display_done                     A:804F
+display_home                     A:803B
+display_loop                     A:8043
+display_putc                     A:8050
+display_setup                    A:801B
+display_string                   A:8041
+irq                              A:80A1
+loop                             A:8018
+msg                              A:80A2
+nmi                              A:80A1
+print                            A:800C
+reset                            A:8000
+toggle_execute                   A:8089
+vector_exit                      A:80A1
+wait_lcd                         A:8068
+
+Symbols by value:
+0020 RS
+0040 RW
+0080 E
+0200 DISPLAY
+7010 MMIO
+7010 PORTB
+7011 PORTA
+7012 DDRB
+7013 DDRA
+8000 ROM
+8000 reset
+800C print
+8018 loop
+801B display_setup
+8035 display_clear
+803B display_home
+8041 display_string
+8043 display_loop
+804F display_done
+8050 display_putc
+8068 wait_lcd
+806D display_busy
+8089 toggle_execute
+80A1 nmi
+80A1 vector_exit
+80A1 irq
+80A2 msg
+FFFA VECTORS

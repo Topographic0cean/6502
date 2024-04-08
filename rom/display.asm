@@ -18,7 +18,7 @@ display_clear:
   jsr toggle_execute
   rts
 
-display_home
+display_home:
   lda #%00000010
   jsr toggle_execute
   rts
@@ -26,13 +26,13 @@ display_home
 display_string:
     ; displays the string stored at display_string_buffer
   ldx #$00
-loop:
+display_loop:
   lda DISPLAY, x
-  beq done
+  beq display_done
   jsr display_putc
   inx
-  jmp loop 
-done:
+  jmp display_loop
+display_done:
   rts
 
 display_putc:
@@ -51,14 +51,14 @@ display_putc:
 wait_lcd:
   lda #%0000000  ; all output
   sta DDRB   
-busy:     
+display_busy:     
   lda #RW
   sta PORTA
   lda #(RW | E)
   sta PORTA
   lda PORTB
   and #%10000000
-  bne busy
+  bne display_busy
   lda #RW
   sta PORTA
   lda #%11111111  ; all output
@@ -77,4 +77,3 @@ toggle_execute:
   lda #0
   sta PORTA
   rts
-
