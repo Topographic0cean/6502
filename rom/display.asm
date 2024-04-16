@@ -1,3 +1,7 @@
+PORTB = LCD
+PORTA = (LCD+1)
+DDRB  = (LCD+2)
+DDRA  = (LCD+3)
 
 display_setup:      
     ; setup the display to 8 bits 2 lines
@@ -24,19 +28,19 @@ display_home:
   rts
 
 display_string:
-    ; displays the string stored at display_string_buffer
-  ldx #$00
+    ; displays the string whose address is stored at DISPLAY
+  ldy #$00
 display_loop:
-  lda DISPLAY, x
+  lda (DISPLAY),y
   beq display_done
   jsr display_putc
-  inx
+  iny
   jmp display_loop
 display_done:
   rts
 
-display_putc:
-  pha
+display_putc:     ; put the character in the accumulator to
+  pha             ; the LCD
   jsr wait_lcd
   pla
   sta PORTB       
