@@ -2,13 +2,9 @@ DISPLAY   = $0000 ; 2 byte address of string
 HEAP      = $0300
 CLOCK     = $0400 ; 2 bytes
 LCD       = $7010
-UART      = $7020
+UART      = $7040
 ROM       = $8000
 VECTORS   = $FFFA
-
-E  = %10000000
-RW = %01000000
-RS = %00100000
 
   .org ROM
 reset:
@@ -21,9 +17,7 @@ reset:
   ;jsr interrupt_setup
   cli
   jsr display_setup
-  jsr display_clear
-  ;jsr clock_loop
-  ;jsr keyboard_reset
+  jsr keyboard_setup
 
   lda #">"
   jsr display_putc
@@ -32,7 +26,6 @@ reset:
   lda #>hello
   sta DISPLAY+1
   jsr display_string
-  jsr do_nothing
   jsr keyboard_rx_wait
   jsr display_clear
 keyboard_loop:
@@ -51,6 +44,7 @@ clock_loop:
   jsr hextodec
   ldx #$ff
 strcpy_loop:
+; this needs to change as we load the address
   inx
   lda $304, x
   sta $200, x
@@ -59,12 +53,8 @@ strcpy_loop:
   jsr display_string
   jmp clock_loop
 
-do_nothing:
-  jmp do_nothing
-
-  .include "display.asm"
-  .include "hextodec.asm"
-  .include "interrupts.asm"
+  .include "display.asm
+  .include "hextodec.asm
   .include "keyboard.asm"
 
 nmi:
@@ -75,7 +65,6 @@ irq:
 vector_exit:
   bit PORTA
   rti
-
 
 hello: .asciiz "Hello, world!"
 

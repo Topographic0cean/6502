@@ -144,6 +144,7 @@ int main(int argc, const char *argv[])
             break;
         }
         step6502();
+        w65c22_tick();
         if (options.sleep > 0)
             nanosleep(&asleep, NULL);
         c++;

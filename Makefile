@@ -3,9 +3,9 @@ EXE = emulate6502
 CC = gcc
 LD = gcc
 
-CFLAGS =  -g
-LDFLAGS = 
-LDLIBS = -lpopt
+CFLAGS = -g -I/opt/homebrew/include
+LDFLAGS =  -L/opt/homebrew/lib
+LDLIBS = -lpopt 
 
 # build directories
 BIN = bin

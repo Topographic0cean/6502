@@ -3,6 +3,10 @@ PORTA = (LCD+1)
 DDRB  = (LCD+2)
 DDRA  = (LCD+3)
 
+E  = %10000000
+RW = %01000000
+RS = %00100000
+
 display_setup:      
     ; setup the display to 8 bits 2 lines
   lda #%11111111  ; all output
