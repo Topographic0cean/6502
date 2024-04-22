@@ -20,7 +20,7 @@ OBJECTS := \
 	$(patsubst $(SRC)/%.cc, $(OBJ)/%.o, $(wildcard $(SRC)/*.cc)) \
 	$(patsubst $(SRC)/%.cpp, $(OBJ)/%.o, $(wildcard $(SRC)/*.cpp)) \
 	$(patsubst $(SRC)/%.cxx, $(OBJ)/%.o, $(wildcard $(SRC)/*.cxx))
-
+ASM := $(wildcard $(ROM)/*.asm)
 # include compiler-generated dependency rules
 DEPENDS := $(OBJECTS:.o=.d)
 
@@ -33,8 +33,8 @@ LINK.o = $(LD) $(LDFLAGS)  $(OBJECTS) -o $@ $(LDLIBS)
 .PHONY: all
 all: $(BIN)/$(EXE) rom.bin
 
-rom.bin: $(ROM)/rom.asm
-	vasm -Fbin -dotdir  -L rom.list -o rom.bin $(ROM)/rom.asm
+rom.bin: $(ASM)
+	vasm -Fbin -dotdir -c02 -L rom.list -o rom.bin $(ROM)/rom.asm
 
 $(BIN)/$(EXE): $(SRC) $(OBJ) $(BIN) $(OBJECTS)
 	$(LINK.o)

@@ -1,8 +1,10 @@
 DISPLAY   = $0000 ; 2 byte address of string
 HEAP      = $0300
 CLOCK     = $0400 ; 2 bytes
-LCD       = $7010
-UART      = $7040
+;LCD       = $7010
+LCD       = $6000
+;UART      = $7040
+UART      = $5000
 ROM       = $8000
 VECTORS   = $FFFA
 
@@ -10,31 +12,35 @@ VECTORS   = $FFFA
 reset:
   ldx #$ff
   txs
-  lda #$00
-  sta CLOCK
-  sta CLOCK+1
-
   ;jsr interrupt_setup
   cli
   jsr display_setup
-  jsr keyboard_setup
-
-  lda #">"
-  jsr display_putc
-  lda #<hello
-  sta DISPLAY
-  lda #>hello
-  sta DISPLAY+1
-  jsr display_string
-  jsr keyboard_rx_wait
   jsr display_clear
+  jsr rs232_setup
+
+  ldx #$00
+start_message:
+  lda hello,x
+  beq end_message
+  jsr rs232_send
+  inx
+  jmp start_message
+end_message:
+  lda #$0D
+  jsr rs232_send
+
 keyboard_loop:
-  jsr keyboard_rx_wait
+  jsr rs232_recv
   jsr display_putc
-  ;jsr keyboard_tx_wait
-  jsr keyboard_loop
+  pha
+  jsr rs232_send
+  pla
+  jmp keyboard_loop
   
 clock_loop:
+  lda #$00
+  sta CLOCK
+  sta CLOCK+1
   sei
   lda CLOCK
   sta HEAP
@@ -42,20 +48,20 @@ clock_loop:
   sta HEAP + 1
   cli
   jsr hextodec
-  ldx #$ff
-strcpy_loop:
-; this needs to change as we load the address
-  inx
-  lda $304, x
-  sta $200, x
-  bne strcpy_loop
-  jsr display_home
+  lda #$04
+  sta DISPLAY
+  lda #$03
+  sta DISPLAY+1
   jsr display_string
-  jmp clock_loop
+  rts
 
-  .include "display.asm
-  .include "hextodec.asm
-  .include "keyboard.asm"
+do_nothing:
+  jmp do_nothing
+
+  .include "display.asm"
+  .include "hextodec.asm"
+  .include "interrupts.asm"
+  .include "rs232.asm"
 
 nmi:
 irq:
@@ -66,7 +72,7 @@ vector_exit:
   bit PORTA
   rti
 
-hello: .asciiz "Hello, world!"
+hello: .string "ROS 0.0"
 
   .org VECTORS
   .word nmi
