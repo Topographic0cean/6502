@@ -22,19 +22,25 @@ reset:
 start_message:
   lda hello,x
   beq end_message
+  pha
   jsr rs232_send
+  pla
+  jsr display_putc
   inx
   jmp start_message
 end_message:
   lda #$0D
   jsr rs232_send
-
-keyboard_loop:
   jsr rs232_recv
-  jsr display_putc
   pha
-  jsr rs232_send
+  jsr display_clear
+keyboard_loop:
   pla
+  pha
+  ;jsr rs232_send
+  pla
+  jsr display_putc
+  jsr rs232_recv
   jmp keyboard_loop
   
 clock_loop:
