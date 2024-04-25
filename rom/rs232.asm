@@ -23,10 +23,12 @@ rs232_recv:
 rs232_send:
   sta UART_DATA
 rs232_send_loop:
+  pha
   lda UART_STATUS
   and #$10        ; check transmit buffer status
   beq rs232_send_loop
   jsr rs232_delay
+  pla
   rts
 
 rs232_delay:

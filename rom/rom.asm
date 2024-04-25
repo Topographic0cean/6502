@@ -8,18 +8,11 @@ LCD       = $6000
 ;UART      = $7040
 UART      = $5000
 ROM       = $8000
+WOZMON    = $FF00
 VECTORS   = $FFFA
 
   .org ROM
-reset:
-  ldx #$ff
-  txs
-  ;jsr interrupt_setup
-  cli
-  ;jsr display_setup
-  jsr rs232_setup
- ; jsr display_clear
-  ldx #$00
+
 start_message:
   lda hello,x
   beq end_message
