@@ -13,6 +13,7 @@ rs232_setup:
   rts 
 
 rs232_recv:
+  jsr rs232_delay
   lda UART_STATUS
   and #$08          ; check rx buffer status flag
   beq rs232_recv
@@ -30,7 +31,7 @@ rs232_send_loop:
 
 rs232_delay:
   phx
-  ldx #200
+  ldx #100
 rs232_delay_loop:
   dex
   bne rs232_delay_loop
