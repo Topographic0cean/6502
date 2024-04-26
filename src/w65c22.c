@@ -30,7 +30,7 @@ static uint8_t ier = 0;
 static uint16_t timer1 = 0;
 static uint8_t timer1_running = 0;
 
-int verbose = 0;
+static int verbose = 0;
 
 void w65c22_init(int v)
 {

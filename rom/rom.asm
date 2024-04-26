@@ -60,12 +60,6 @@ clock_loop:
 do_nothing:
   jmp do_nothing
 
-  .include "display.asm"
-  .include "hextodec.asm"
-  .include "interrupts.asm"
-  .include "rs232.asm"
-  .include "wozmon.asm"
-
 nmi:
 irq:
   inc CLOCK
@@ -76,6 +70,14 @@ vector_exit:
   rti
 
 hello: .string "ROS 0.0"
+
+  .include "display.asm"
+  .include "hextodec.asm"
+  .include "interrupts.asm"
+  .include "rs232.asm"
+  .include "wozmon.asm"
+
+
 
   .org VECTORS
   .word nmi

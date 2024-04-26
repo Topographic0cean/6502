@@ -21,9 +21,9 @@ rs232_recv:
   rts
 
 rs232_send:
+  pha
   sta UART_DATA
 rs232_send_loop:
-  pha
   lda UART_STATUS
   and #$10        ; check transmit buffer status
   beq rs232_send_loop
