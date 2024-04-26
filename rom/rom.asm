@@ -64,6 +64,7 @@ do_nothing:
   .include "hextodec.asm"
   .include "interrupts.asm"
   .include "rs232.asm"
+  .include "wozmon.asm"
 
 nmi:
 irq:
@@ -78,5 +79,5 @@ hello: .string "ROS 0.0"
 
   .org VECTORS
   .word nmi
-  .word reset
+  .word WOZMON
   .word irq

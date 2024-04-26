@@ -1,6 +1,9 @@
   .org WOZMON
 
-
+XAML = $24                            ; last opened location low
+XAMH = $25                            ; last opened location high
+STL  = $26                            ; store address low
+STH  = $27                            ; store address high
 L    = $28                            ; Hex value parsing Low
 H    = $29                            ; Hex value parsing High
 YSAV = $2A                            ; Used to see if hex value is given
@@ -10,7 +13,6 @@ reset:
   ldx #$ff
   txs
   jsr rs232_setup
-  jsr display_setup
 
 notcr:
   cmp #$08              ; backspace?
@@ -41,7 +43,7 @@ nextchar:
   bne notcr
 
   ldy #$ff
-  lda $#00
+  lda #$00
   tax
 setblock:
   asl
@@ -66,7 +68,7 @@ nextitem:
   sty YSAV              ; save y for comparison
 
 nexthex:
-  lda INPUTBUF, yes     ; get character for hex test.
+  lda INPUTBUF, y       ; get character for hex test.
   eor #$30              ; map digits to 0-9
   cmp #$0a              ; digit?
   bcc dig               ; yes
@@ -92,4 +94,80 @@ hexshift:
   bne nexthex           ; always taken. check next char for hex
 
 nothex:
-  
+  cpy YSAV              ; check if L, H empty (no hex digits)
+  beq escape            ; yes, generate esc sequence
+  bit MODE              ; test MODE byte
+  bvc notstor           ; B6=0 is STOR, 1 is XAM and BLOCK XAM
+  lda L                 ; LSD's of hex data 
+  sta (STL,x)           ; store current store index
+  inc STL               ; increment store index
+  bne nextitem          ; get next item (no carry)
+  inc STH               ; add carry to store index high order
+tonextitem:
+  jmp nextitem
+
+run:
+  jmp (XAML)            ; run at current xam index
+
+notstor:
+  bmi xamnext           ; b7= 0 for XAM, 1 for block xam
+
+  ldx #$02  
+setaddr:
+  lda L-1,x             ; copy hex data to
+  sta STL-1,x           ; store index
+  sta XAML-1,x          ; add to xam index
+  dex
+  bne setaddr
+
+nxtprnt:
+  bne prdata            ; NE means no address to print
+  lda #$0D              ; CR
+  jsr rs232_send
+  lda XAMH              ; examine index high order byte
+  jsr prbyte
+  lda XAML              ; lower order examine index byte
+  jsr prbyte            ; output it in hex format
+  lda #$3a              ; ":"
+  jsr rs232_send
+
+prdata:
+  lda #$20              ; blank
+  jsr rs232_send
+  lda (XAML,x)          ; get data byte at examine index
+  jsr prbyte
+xamnext:
+  stx MODE              ; 0 -> MODE (xam mode)
+  lda XAML
+  cmp L                 ; compare examine index to hex data
+  lda XAMH 
+  sbc H 
+  bcs tonextitem        ; not less so no more data to output
+
+  inc XAML
+  bne mod8chk           ; increment examine index
+  inc XAMH
+
+mod8chk:
+  lda XAML              ; check low order examine index byte
+  and #$07              ; ofr mod 8 = 0
+  bpl nxtprnt           ; always taken
+
+prbyte:
+  pha
+  lsr
+  lsr
+  lsr
+  lsr
+  jsr prhex
+  pla
+
+prhex:
+  and #$0f           ; mask lsd for hex print
+  ora #$30          ; add "0"
+  cmp #$3a          ; digit ?
+  bcc echo
+  adc #$06
+echo:
+  jsr rs232_send
+  rts

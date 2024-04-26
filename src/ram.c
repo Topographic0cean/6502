@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "decoder.h"
 #include "ram.h"
@@ -10,18 +11,19 @@ static char RAM[ROM_END + 1];
 
 void ram_init(char *filename, int instruction_log)
 {
+    memset(RAM, 0, sizeof(RAM));
     if (instruction_log)
         ilog = fopen("instructions.log", "w");
 
-    // read the binary file ram.bin into RAM
+    // read the binary file into high 32K of RAM
     FILE *file = fopen(filename, "rb");
     if (file == NULL)
     {
         fprintf(stderr, "Error: Could not open %s\n", filename);
         exit(1);
     }
-    size_t result = fread(RAM, 1, 0x10000, file);
-    if (result != 0x10000)
+    size_t result = fread(RAM+0x8000, 1, 0x8000, file);
+    if (result != 0x8000)
     {
         fprintf(stderr, "Error: Could not read %s\n", filename);
         exit(1);
