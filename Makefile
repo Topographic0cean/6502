@@ -61,7 +61,7 @@ run: $(BIN)/$(EXE)
 clean:
 	$(RM) -r $(OBJ)
 	$(RM) -r $(BIN)
-	$(RM) *.log *.bin
+	$(RM) *.log *.bin rom.list
 
 -include $(DEPENDS)
 
