@@ -6,7 +6,7 @@ UART_CTRL    = (UART+3)
 rs232_setup:
   lda #$00
   sta UART_STATUS   ; reset the chip
-  lda #$1F         ; N-8-1 19200 BAUD
+  lda #$1F          ; N-8-1 19200 BAUD
   sta UART_CTRL
   lda #$0b          ; no parity. no echo. no interrupts
   sta UART_CMD

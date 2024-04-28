@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <time.h>
 #include <popt.h>
-#include <ncurses.h>
 
 #include "6502.h"
 #include "ram.h"
@@ -94,7 +93,6 @@ void quit(int signum)
 {
     printf("QUIT\n");
     done = 1;
-    endwin();
 }
 
 void setup_interrupt_handlers()
@@ -109,9 +107,6 @@ void setup_interrupt_handlers()
 void initialize( Options* options)
 {
     setup_interrupt_handlers();
-    initscr();
-    cbreak();
-    noecho();   
     ram_init(options->rom, options->instructions);
     w65c22_init(options->verbose);
     uart_init(options->verbose);

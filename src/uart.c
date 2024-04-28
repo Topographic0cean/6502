@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <ncurses.h>
 #include "uart.h"
 
 #define UART_DATA     0
@@ -18,8 +17,8 @@ void uart_write(uint8_t address, uint8_t value) {
     switch(address) {
         case UART_DATA:
             if (value == 0x0d)
-                addch(0x0a);
-            addch(value);
+                putchar(0x0a);
+            putchar(value);
             break;
         case UART_STATUS:
             // reset chip
@@ -37,7 +36,7 @@ uint8_t uart_read(uint8_t address) {
     uint8_t c;
     switch(address) {
         case UART_DATA:
-        c = getch();
+        c = getchar();
         if (c == 0x0a) 
             return 0x0d;
         return c;

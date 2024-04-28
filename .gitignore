@@ -3,3 +3,4 @@ obj
 *.log
 *.bin
 *.list
+*.o

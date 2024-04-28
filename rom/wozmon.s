@@ -1,4 +1,4 @@
-  .org WOZMON
+ .segment    "WOZMON"
 
 XAML = $24                            ; last opened location low
 XAMH = $25                            ; last opened location high
@@ -11,7 +11,7 @@ MODE = $2b                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 
 reset:      ldx #$ff
             txs
-            jsr rs232_setup
+            jsr acia_setup
             lda #$1b
 
 notcr:      cmp #$08              ; backspace?
@@ -22,18 +22,20 @@ notcr:      cmp #$08              ; backspace?
             bpl nextchar          ; auto esc if line longer that 127
 
 escape:     lda #$5c              ; "\"
-            jsr rs232_send
+            jsr acia_send
 
 getline:    lda #$0d              ; send CR 
-            jsr rs232_send
+            jsr acia_send
 
             ldy #$01              ; initialize text index
 backspace:  dey 
             bmi getline           ; beyond start of line, reinitialize
 
-nextchar:   jsr rs232_recv
+nextchar:   jsr acia_recv
+            pha
+            jsr acia_send
+            pla
             sta INPUTBUF, y
-            jsr rs232_send
             cmp #$0d
             bne notcr
 
@@ -105,16 +107,16 @@ setaddr:    lda L-1,x             ; copy hex data to
 
 nxtprnt:    bne prdata            ; NE means no address to print
             lda #$0D              ; CR
-            jsr rs232_send
+            jsr acia_send
             lda XAMH              ; examine index high order byte
             jsr prbyte
             lda XAML              ; lower order examine index byte
             jsr prbyte            ; output it in hex format
             lda #$3a              ; ":"
-            jsr rs232_send
+            jsr acia_send
 
 prdata:     lda #$20              ; blank
-            jsr rs232_send
+            jsr acia_send
             lda (XAML,x)          ; get data byte at examine index
             jsr prbyte
 xamnext:    stx MODE              ; 0 -> MODE (xam mode)
@@ -146,5 +148,5 @@ prhex:      and #$0f           ; mask lsd for hex print
             bcc echo
             adc #$06
 
-echo:       jsr rs232_send
+echo:       jsr acia_send
             rts
