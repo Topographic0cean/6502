@@ -3,5 +3,6 @@ obj
 *.log
 *.bin
 *.list
+*.lbl
 *.o
 tmp

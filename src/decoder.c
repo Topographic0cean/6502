@@ -23,8 +23,7 @@ uint8_t read6502(uint16_t address)
     }
     else
     {
-        fprintf(stderr, "READ: invalid memory address: %4x\n", address);
-        exit(1);
+        return 0x00;
     }
     return 0;
 }
@@ -46,7 +45,5 @@ void write6502(uint16_t address, uint8_t value)
     }
     else
     {
-        fprintf(stderr, "WRITE: invalid memory address: %4x\n", address);
-        exit(1);
     }
 }

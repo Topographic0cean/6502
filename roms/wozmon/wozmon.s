@@ -30,6 +30,8 @@ escape:     lda #$5c              ; "\"
 
 getline:    lda #$0d              ; send CR 
             jsr ACIA_SEND
+            lda #$0a
+            jsr ACIA_SEND
 
             ldy #$01              ; initialize text index
 backspace:  dey 
@@ -112,6 +114,8 @@ setaddr:    lda L-1,x             ; copy hex data to
 nxtprnt:    bne prdata            ; NE means no address to print
             lda #$0D              ; CR
             jsr ACIA_SEND
+            lda #$0A              ; CR
+            jsr ACIA_SEND
             lda XAMH              ; examine index high order byte
             jsr prbyte
             lda XAML              ; lower order examine index byte
@@ -159,7 +163,6 @@ NMI:
 IRQ:
             rti
 
-ISCNTC:
 SAVE:
 LOAD:
             rts

@@ -26,7 +26,8 @@ void acia_write(uint8_t address, uint8_t value) {
         case ACIA_DATA:
             if (value == 0x0d)
                 putchar(0x0a);
-            putchar(value);
+            if (value != 0x0a)
+                putchar(value);
             fflush(stdout);
             break;
         case ACIA_STATUS:
@@ -46,7 +47,6 @@ uint8_t acia_read(uint8_t address) {
     switch(address) {
         case ACIA_DATA:
         c = getchar();
-        fflush(stdin);
         if (c == 0x0a) 
            return 0x0d;
         return c;
