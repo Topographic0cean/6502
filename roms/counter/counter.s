@@ -2,7 +2,7 @@
 .debuginfo
 .segment  "ROM"
 
-STACK     = $0100 ; 256 byte stack
+DISPLAY   = $0000
 HEAP      = $0300
 CLOCK     = $0400 ; 2 bytes
 

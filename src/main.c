@@ -8,7 +8,7 @@
 #include "6502.h"
 #include "ram.h"
 #include "w65c22.h"
-#include "uart.h"
+#include "acia.h"
 #include "display.h"
 
 typedef struct options
@@ -109,7 +109,7 @@ void initialize( Options* options)
     setup_interrupt_handlers();
     ram_init(options->rom, options->instructions);
     w65c22_init(options->verbose);
-    uart_init(options->verbose);
+    acia_init(options->verbose);
     display_init(options->io);
     reset6502();
 }

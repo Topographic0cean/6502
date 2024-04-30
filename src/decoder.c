@@ -4,7 +4,7 @@
 #include "decoder.h"
 #include "ram.h"
 #include "w65c22.h"
-#include "uart.h"
+#include "acia.h"
 
 uint8_t read6502(uint16_t address)
 {
@@ -13,9 +13,9 @@ uint8_t read6502(uint16_t address)
     {
         return ram_read(address);
     }
-    else if (address >= UART_START && address <= UART_END)
+    else if (address >= ACIA_START && address <= ACIA_END)
     {
-        return uart_read(reg);
+        return acia_read(reg);
     }
     else if (address >= LCD_START && address <= LCD_END)
     {
@@ -40,9 +40,9 @@ void write6502(uint16_t address, uint8_t value)
     {
         return w65c22_write(reg, value);
     }
-    else if (address >= UART_START && address <= UART_END)
+    else if (address >= ACIA_START && address <= ACIA_END)
     {
-        return uart_write(reg, value);
+        return acia_write(reg, value);
     }
     else
     {

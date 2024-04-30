@@ -1,17 +1,20 @@
-  .setcpu   "65C02"
-  .debuginfo
-  .segment    "ROM"
+.setcpu   "65C02"
+.debuginfo
+.segment    "ROM"
+
+DISPLAY   = $0000
 
 RESET:
   lda #$ff
   txs
   jsr DISPLAY_SETUP
   jsr DISPLAY_CLEAR
+  ldy #00
 start_message:
-  lda hello,x
+  lda hello, y
   beq end_message
   jsr DISPLAY_PUTC
-  inx
+  iny
   jmp start_message
 end_message:
 do_nothing:

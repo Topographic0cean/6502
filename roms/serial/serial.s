@@ -14,10 +14,11 @@ start_message:
   inx
   jmp start_message
 end_message:
-do_nothing:
-  jmp do_nothing
+  jsr ACIA_RECV
+  jsr ACIA_SEND
+  jmp end_message
 
-hello: .byte "Hello, world!", $00
+hello: .byte "Hello, world!", $0D, $00
 
 NMI:
 IRQ:

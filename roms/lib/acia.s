@@ -1,4 +1,4 @@
-  
+  .setcpu   "65C02" 
   .segment    "ROM"
 
   ACIA        = $5000
@@ -35,10 +35,12 @@ acia_send_loop:
   rts
 
 acia_delay:
-  phx
+  txa
+  pha
   ldx #100
 acia_delay_loop:
   dex
   bne acia_delay_loop
-  plx
+  pla
+  tax
   rts

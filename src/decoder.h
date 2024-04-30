@@ -6,7 +6,7 @@
 0x0200 - 0x02FF: Reserved for input buffer
 0x0300 - 0x030a: HEAP
 
-UART = 0x5000
+ACIA = 0x5000
 LCD = 0x6000
 
 0x8000 - 0xFFF9: ROM
@@ -19,8 +19,8 @@ LCD = 0x6000
 
 #define RAM_START 0x0000
 #define RAM_END 0x3FFF
-#define UART_START 0x5000
-#define UART_END 0x500F
+#define ACIA_START 0x5000
+#define ACIA_END 0x500F
 #define LCD_START 0x6000
 #define LCD_END 0x600F
 #define ROM_START 0x8000
