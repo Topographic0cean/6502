@@ -4,7 +4,7 @@ LIB := $(wildcard lib/*.s)
 .DEFAULT_GOAL = all
 
 .PHONY: all clean
-all: hello.bin counter.bin serial.bin wozmon.bin
+all: hello.bin counter.bin serial.bin wozmon.bin msbasic.bin
 
 
 hello.bin: hello/hello.s $(LIB)
@@ -22,6 +22,10 @@ serial.bin: serial/serial.s $(LIB)
 wozmon.bin: wozmon/wozmon.s $(LIB)
 	ca65 -o wozmon/wozmon.o wozmon/wozmon.s -l wozmon.list
 	ld65 -C wozmon/wozmon.cfg wozmon/wozmon.o -o wozmon.bin
+
+msbasic.bin:
+	cd msbasic && ./make.sh
+	cp msbasic/tmp/eater.bin msbasic.bin
 
 clean:
 	$(RM) *.o */*.o *.bin *.list

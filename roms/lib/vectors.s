@@ -1,5 +1,5 @@
 
-.segment    "VECTORS"
+.segment    "INTERRUPT"
 
 .word NMI
 .word RESET

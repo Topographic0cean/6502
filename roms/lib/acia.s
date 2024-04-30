@@ -15,6 +15,7 @@ ACIA_SETUP:
   lda #$0b ; no parity. no echo. no interrupts
   rts
 
+MONRDKEY:
 ACIA_RECV:
   jsr acia_delay
   lda ACIA_STATUS
@@ -23,6 +24,7 @@ ACIA_RECV:
   lda ACIA_DATA
   rts
 
+MONCOUT:
 ACIA_SEND:
   pha
   sta ACIA_DATA

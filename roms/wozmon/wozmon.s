@@ -159,5 +159,10 @@ NMI:
 IRQ:
             rti
 
+ISCNTC:
+SAVE:
+LOAD:
+            rts
+
 .include "../lib/acia.s"
 .include "../lib/vectors.s"
