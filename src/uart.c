@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <termios.h>
 #include "uart.h"
 
 #define UART_DATA     0
@@ -11,6 +12,8 @@ static int verbose = 0;
 
 void uart_init(int v) {
     verbose = v;
+    setvbuf(stdin, NULL, _IONBF, 0);
+    fflush(stdin);
 }
 
 void uart_write(uint8_t address, uint8_t value) {
@@ -38,7 +41,7 @@ uint8_t uart_read(uint8_t address) {
         case UART_DATA:
         c = getchar();
         if (c == 0x0a) 
-            return 0x0d;
+           return 0x0d;
         return c;
         case UART_STATUS:
             return 0x18;

@@ -5,13 +5,13 @@ LD = gcc
 
 CFLAGS = -g -I/opt/homebrew/include
 LDFLAGS =  -L/opt/homebrew/lib
-LDLIBS = -lpopt -lncurses 
+LDLIBS = -lpopt
 
 # build directories
 BIN = bin
 OBJ = obj
 SRC = src
-ROM = rom
+ROMS = roms
 
 SOURCES := $(wildcard $(SRC)/*.c $(SRC)/*.cc $(SRC)/*.cpp $(SRC)/*.cxx)
 
@@ -30,12 +30,11 @@ LINK.o = $(LD) $(LDFLAGS)  $(OBJECTS) -o $@ $(LDLIBS)
 
 .DEFAULT_GOAL = all
 
-.PHONY: all
-all: $(BIN)/$(EXE) rom.bin
+.PHONY: all $(ROMS)
+all: $(BIN)/$(EXE) $(ROMS)
 
-rom.bin: $(ASM)
-	ca65 rom/bios.s -l rom.list
-	ld65 -C rom/bios.cfg rom/bios.o -o rom.bin
+$(ROMS):
+	make -C $(ROMS)
 
 $(BIN)/$(EXE): $(SRC) $(OBJ) $(BIN) $(OBJECTS)
 	$(LINK.o)
@@ -61,7 +60,8 @@ run: $(BIN)/$(EXE)
 clean:
 	$(RM) -r $(OBJ)
 	$(RM) -r $(BIN)
-	$(RM) *.log *.bin rom.list
+	$(RM) *.log *.bin
+	make -C $(ROMS) clean
 
 -include $(DEPENDS)
 
