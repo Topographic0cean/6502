@@ -98,7 +98,7 @@ void quit(int signum)
 void setup_interrupt_handlers()
 {
     signal(SIGUSR2, nmi_interrupt);
-    signal(SIGINT, quit);
+    //signal(SIGINT, quit);
     signal(SIGQUIT, quit);
     signal(SIGUSR1, maskable_interrupt);
     signal(SIGABRT, dump_core);
