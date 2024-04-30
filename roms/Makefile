@@ -1,21 +1,27 @@
 ASM := $(wildcard *.s)
+LIB := $(wildcard lib/*.s)
 
 .DEFAULT_GOAL = all
 
 .PHONY: all clean
-all: hello.bin counter.bin serial.bin
+all: hello.bin counter.bin serial.bin wozmon.bin
 
-hello.bin: hello/hello.s
+
+hello.bin: hello/hello.s $(LIB)
 	ca65 -o hello/hello.o hello/hello.s -l hello.list
 	ld65 -C hello/hello.cfg hello/hello.o -o hello.bin
 
-counter.bin: counter/counter.s
+counter.bin: counter/counter.s $(LIB)
 	ca65 -o counter/counter.o counter/counter.s -l counter.list
 	ld65 -C counter/counter.cfg counter/counter.o -o counter.bin
 
-serial.bin: serial/serial.s
+serial.bin: serial/serial.s $(LIB)
 	ca65 -o serial/serial.o serial/serial.s -l serial.list
 	ld65 -C serial/serial.cfg serial/serial.o -o serial.bin
+
+wozmon.bin: wozmon/wozmon.s $(LIB)
+	ca65 -o wozmon/wozmon.o wozmon/wozmon.s -l wozmon.list
+	ld65 -C wozmon/wozmon.cfg wozmon/wozmon.o -o wozmon.bin
 
 clean:
 	$(RM) *.o */*.o *.bin *.list

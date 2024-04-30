@@ -10,8 +10,8 @@ L    = $28                            ; Hex value parsing Low
 H    = $29                            ; Hex value parsing High
 YSAV = $2A                            ; Used to see if hex value is given
 MODE = $2b                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
+INPUTBUF = $0200
 
-.include "../lib/acia.s"
 
 RESET:      ldx #$ff
             txs
@@ -155,4 +155,9 @@ prhex:      and #$0f           ; mask lsd for hex print
 echo:       jsr ACIA_SEND
             rts
 
+NMI:
+IRQ:
+            rti
+
+.include "../lib/acia.s"
 .include "../lib/vectors.s"
