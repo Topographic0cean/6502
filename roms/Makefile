@@ -1,5 +1,6 @@
 ASM := $(wildcard *.s)
 LIB := $(wildcard lib/*.s)
+MSB := $(wilcard msbasic/*.s)
 
 .DEFAULT_GOAL = all
 
@@ -23,7 +24,7 @@ wozmon.bin: wozmon/wozmon.s $(LIB)
 	ca65 -o wozmon/wozmon.o wozmon/wozmon.s -l wozmon/wozmon.list
 	ld65 -C wozmon/wozmon.cfg wozmon/wozmon.o -o wozmon.bin
 
-msbasic.bin:
+msbasic.bin: wozmon/wozmon.s $(LIB) $(MSB)
 	make -C msbasic
 
 clean:

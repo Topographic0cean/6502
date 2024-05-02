@@ -14,8 +14,13 @@ start_message:
   inx
   jmp start_message
 end_message:
+  lda #$0D
+  jsr ACIA_SEND
+  lda #$0A
+  jsr ACIA_SEND
 loop:
   jsr ACIA_RECV
+  bcc loop
   jsr ACIA_SEND
   jmp loop
 

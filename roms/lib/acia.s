@@ -17,11 +17,14 @@ ACIA_SETUP:
 
 MONRDKEY:
 ACIA_RECV:
-  jsr acia_delay
   lda ACIA_STATUS
   and #$08          ; check rx buffer status flag
-  beq ACIA_RECV
+  beq @no_key
   lda ACIA_DATA
+  sec
+  rts 
+@no_key:
+  clc
   rts
 
 MONCOUT:
@@ -32,11 +35,6 @@ acia_send_loop:
   lda ACIA_STATUS
   and #$10        ; check transmit buffer status
   beq acia_send_loop
-  jsr acia_delay
-  pla
-  rts
-
-acia_delay:
   txa
   pha
   ldx #100
@@ -45,4 +43,6 @@ acia_delay_loop:
   bne acia_delay_loop
   pla
   tax
-  rts
+  pla
+  rts 
+  

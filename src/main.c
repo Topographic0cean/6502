@@ -91,7 +91,6 @@ void maskable_interrupt(int signum)
 
 void quit(int signum)
 {
-    printf("QUIT\n");
     done = 1;
 }
 

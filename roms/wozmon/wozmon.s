@@ -1,6 +1,6 @@
-  .setcpu   "65C02"
-  .debuginfo
-  .segment    "WOZMON"
+.setcpu   "65C02"
+.debuginfo
+.segment    "WOZMON"
 
 XAML = $24                            ; last opened location low
 XAMH = $25                            ; last opened location high
@@ -11,7 +11,6 @@ H    = $29                            ; Hex value parsing High
 YSAV = $2A                            ; Used to see if hex value is given
 MODE = $2b                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 INPUTBUF = $0200
-
 
 RESET:      ldx #$ff
             txs
@@ -28,9 +27,9 @@ notcr:      cmp #$08              ; backspace?
 escape:     lda #$5c              ; "\"
             jsr ACIA_SEND
 
-getline:    lda #$0d              ; send CR 
+getline:    lda #$0D              ; send CR 
             jsr ACIA_SEND
-            lda #$0a
+            lda #$0A
             jsr ACIA_SEND
 
             ldy #$01              ; initialize text index
@@ -38,11 +37,10 @@ backspace:  dey
             bmi getline           ; beyond start of line, reinitialize
 
 nextchar:   jsr ACIA_RECV
-            pha
+            bcc nextchar
             jsr ACIA_SEND
-            pla
             sta INPUTBUF, y
-            cmp #$0d
+            cmp #$0D
             bne notcr
 
             ldy #$ff
@@ -114,7 +112,7 @@ setaddr:    lda L-1,x             ; copy hex data to
 nxtprnt:    bne prdata            ; NE means no address to print
             lda #$0D              ; CR
             jsr ACIA_SEND
-            lda #$0A              ; CR
+            lda #$0A              ; LF
             jsr ACIA_SEND
             lda XAMH              ; examine index high order byte
             jsr prbyte
