@@ -12,10 +12,10 @@ ACIA_SETUP:
   sta ACIA_STATUS ; reset the chip
   lda #$1F ; N-8-1 19200 BAUD
   sta ACIA_CTRL
-  lda #$0b ; no parity. no echo. no interrupts
+  lda #$0B ; no parity. no echo. no interrupts
+  sta ACIA_CMD
   rts
 
-MONRDKEY:
 ACIA_RECV:
   lda ACIA_STATUS
   and #$08          ; check rx buffer status flag
@@ -24,6 +24,17 @@ ACIA_RECV:
   sec
   rts 
 @no_key:
+  clc
+  rts
+
+MONRDKEY:
+  lda ACIA_STATUS
+  and #$08
+  beq @no_keypressed
+  lda ACIA_DATA
+  sec
+  rts
+@no_keypressed:
   clc
   rts
 
@@ -37,12 +48,10 @@ acia_send_loop:
   beq acia_send_loop
   txa
   pha
-  ldx #100
-acia_delay_loop:
-  dex
-  bne acia_delay_loop
+  ldx #$FF
+txdelay:
+  dex 
+  bne txdelay
   pla
   tax
-  pla
-  rts 
-  
+  rts

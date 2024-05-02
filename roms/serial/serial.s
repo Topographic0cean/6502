@@ -3,12 +3,11 @@
   .segment    "ROM"
 
 RESET:
-  lda #$ff
-  txs
   jsr ACIA_SETUP
+
   ldx #$00
 start_message:
-  lda hello,x
+  lda hello, x
   beq end_message
   jsr ACIA_SEND
   inx
@@ -24,7 +23,8 @@ loop:
   jsr ACIA_SEND
   jmp loop
 
-hello: .byte "Hello, world!", $0D, $00
+hello: .byte "Hello, world!", $00
+long_message: .byte "This is a much longer message that may overrun the output at some point.  But this is a good test of how well the output works.", $00
 
 NMI:
 IRQ:

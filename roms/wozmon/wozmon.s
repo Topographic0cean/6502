@@ -12,9 +12,7 @@ YSAV = $2A                            ; Used to see if hex value is given
 MODE = $2b                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 INPUTBUF = $0200
 
-RESET:      ldx #$ff
-            txs
-            jsr ACIA_SETUP
+RESET:      jsr ACIA_SETUP
             lda #$1b
 
 notcr:      cmp #$08              ; backspace?
