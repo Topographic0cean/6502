@@ -62,8 +62,9 @@ uint8_t acia_read(uint8_t address)
         s = read(0, &c, 1);
         if (s == 0)
             return 0x10;
-        else if (c == 0x18)
+        else if (c == 0x18) {
             quit(0);
+        }
         else
         {
             if (c == 0x0A)

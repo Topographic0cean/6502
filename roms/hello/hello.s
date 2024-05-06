@@ -5,8 +5,6 @@
 DISPLAY   = $0000
 
 RESET:
-  lda #$ff
-  txs
   jsr DISPLAY_SETUP
   jsr DISPLAY_CLEAR
   ldy #00

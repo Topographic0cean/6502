@@ -1,7 +1,6 @@
 
 .segment    "ROM"
 
-
 LCD     = $6000
 PORTB   = LCD
 PORTA   = (LCD+1)

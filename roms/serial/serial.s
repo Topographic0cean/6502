@@ -3,6 +3,8 @@
   .segment    "ROM"
 
 RESET:
+  ldx #$ff
+  txs
   jsr ACIA_SETUP
 
   ldx #$00

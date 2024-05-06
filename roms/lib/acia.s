@@ -16,6 +16,7 @@ ACIA_SETUP:
   sta ACIA_CMD
   rts
 
+MONRDKEY:
 ACIA_RECV:
   lda ACIA_STATUS
   and #$08          ; check rx buffer status flag
@@ -27,31 +28,29 @@ ACIA_RECV:
   clc
   rts
 
-MONRDKEY:
-  lda ACIA_STATUS
-  and #$08
-  beq @no_keypressed
-  lda ACIA_DATA
-  sec
-  rts
-@no_keypressed:
-  clc
-  rts
-
 MONCOUT:
 ACIA_SEND:
   pha
   sta ACIA_DATA
-acia_send_loop:
+@send_loop:
   lda ACIA_STATUS
-  and #$10        ; check transmit buffer status
-  beq acia_send_loop
+  and #$10          ; check transmit buffer status
+  beq @send_loop
   txa
   pha
+  tya 
+  pha
+  ldy #$06
+tydelay:
   ldx #$FF
 txdelay:
   dex 
   bne txdelay
+  dey 
+  bne tydelay
+  pla
+  tay 
   pla
   tax
+  pla
   rts
