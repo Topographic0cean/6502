@@ -34,22 +34,12 @@ ACIA_SEND:
   sta ACIA_DATA
 @send_loop:
   lda ACIA_STATUS
-  and #$10          ; check transmit buffer status
-  beq @send_loop
   txa
   pha
-  tya 
-  pha
-  ldy #$06
-tydelay:
   ldx #$FF
 txdelay:
   dex 
   bne txdelay
-  dey 
-  bne tydelay
-  pla
-  tay 
   pla
   tax
   pla
