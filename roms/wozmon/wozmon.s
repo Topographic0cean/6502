@@ -13,8 +13,10 @@ MODE = $2b                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 
 INPUTBUF = $0200
 
-RESET:      jsr ACIA_SETUP
+RESET:      cld
+            jsr ACIA_SETUP
             lda #$1b
+            cli 
 
 notcr:      cmp #$08              ; backspace?
             beq backspace         ; yes
@@ -35,9 +37,8 @@ getline:    lda #$0D              ; send CR
 backspace:  dey 
             bmi getline           ; beyond start of line, reinitialize
 
-nextchar:   jsr ACIA_RECV
+nextchar:   jsr MONRDKEY 
             bcc nextchar
-            jsr ACIA_SEND
             sta INPUTBUF, y
             cmp #$0D
             bne notcr
@@ -156,13 +157,10 @@ prhex:      and #$0f           ; mask lsd for hex print
 echo:       jsr ACIA_SEND
             rts
 
-NMI:
-IRQ:
-            rti
+NMI:        rti
 
 SAVE:
-LOAD:
-            rts
+LOAD:       rts
 
 .include "../lib/acia.s"
 .include "../lib/vectors.s"

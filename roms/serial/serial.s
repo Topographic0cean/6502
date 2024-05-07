@@ -29,7 +29,6 @@ hello: .byte "Hello, world!", $00
 long_message: .byte "This is a much longer message that may overrun the output at some point.  But this is a good test of how well the output works.", $00
 
 NMI:
-IRQ:
   rti
 
 .include "../lib/acia.s"
