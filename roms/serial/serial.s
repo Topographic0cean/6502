@@ -3,26 +3,28 @@
   .segment    "ROM"
 
 RESET:
-  ldx #$ff
-  txs
   jsr ACIA_SETUP
 
-  ldx #$00
+  ldy #$00
 start_message:
   lda hello, x
   beq end_message
-  jsr ACIA_SEND
+  jsr MONCOUT
   inx
   jmp start_message
 end_message:
   lda #$0D
-  jsr ACIA_SEND
+  jsr MONCOUT
   lda #$0A
-  jsr ACIA_SEND
+  jsr MONCOUT
 loop:
-  jsr ACIA_RECV
+  jsr MONRDKEY
   bcc loop
-  jsr ACIA_SEND
+  jsr MONCOUT
+  cmp #$0D
+  bne loop
+  lda #$0A
+  jsr MONCOUT
   jmp loop
 
 hello: .byte "Hello, world!", $00

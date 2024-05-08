@@ -1,13 +1,11 @@
 .setcpu   "65C02" 
 .debuginfo
+.segment  "ROM"
 
-.zeropage
-.org $0
-READ_PTR:       .res 1
-WRITE_PTR:      .res 1
+READ_PTR      = $00
+WRITE_PTR     = $01
 
-.segment "INPUTBUFFER"
-INPUT_BUFFER:  .res $100
+INPUT_BUFFER = $0300
 
 ACIA        = $5000
 ACIA_DATA   = ACIA
@@ -15,7 +13,6 @@ ACIA_STATUS = (ACIA+1)
 ACIA_CMD    = (ACIA+2)
 ACIA_CTRL   = (ACIA+3)
 
-.segment  "ROM"
 ACIA_SETUP: lda #$00
             sta ACIA_STATUS           ; reset the chip
             sta READ_PTR              ; setup the circular input buffer
@@ -26,42 +23,28 @@ ACIA_SETUP: lda #$00
             sta ACIA_CMD
             rts
 
-MONRDKEY:
-ACIA_RECV:  phx
-            jsr BUF_SIZE
+MONRDKEY:   jsr BUF_SIZE
             beq @no_key
-            jsr READ_BUF
-            jsr MONCOUT
+            phx
+            ldx READ_PTR
+            lda INPUT_BUFFER, x
+            inc READ_PTR
             plx
             sec
             rts 
 @no_key:    clc
             rts
 
-MONCOUT:
-ACIA_SEND:  pha
+MONCOUT:    pha
             sta ACIA_DATA
-@send_loop: lda ACIA_STATUS
-            txa
-            pha
+            phx
             ldx #$FF
 txdelay:    dex 
             bne txdelay
-            pla
-            tax
+            plx 
             pla
             rts
   
-WRITE_BUF:  ldx WRITE_PTR
-            sta INPUT_BUFFER, x
-            inc WRITE_PTR
-            rts
-
-READ_BUF:   ldx READ_PTR
-            lda INPUT_BUFFER, x
-            inc READ_PTR
-            rts
-
 BUF_SIZE:   lda WRITE_PTR
             sec
             sbc READ_PTR
@@ -71,7 +54,9 @@ IRQ:        pha
             phx
             lda ACIA_STATUS           ; assume ACIA is only interrupt
             lda ACIA_DATA
-            jsr WRITE_BUF
+WRITE_BUF:  ldx WRITE_PTR
+            sta INPUT_BUFFER, x
+            inc WRITE_PTR
             plx
             pla
             rti

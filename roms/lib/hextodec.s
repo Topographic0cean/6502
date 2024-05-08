@@ -51,12 +51,10 @@ hextodec_push:
   pha
 hextodec_p_loop:
   lda DECSTR, y
-  tax 
-  pla
+  phx 
   sta DECSTR, y
   iny
-  txa 
-  pha
+  plx
   bne hextodec_p_loop
   pla
   sta DECSTR, y

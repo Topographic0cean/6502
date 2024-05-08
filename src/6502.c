@@ -642,6 +642,9 @@ static void pha() {
     push8(a);
 }
 
+static void phx() {
+    push8(x);
+}
 static void php() {
     push8(status | FLAG_BREAK);
 }
@@ -652,6 +655,13 @@ static void pla() {
     zerocalc(a);
     signcalc(a);
 }
+
+static void plx() {
+    x = pull8();
+    zerocalc(x);
+    signcalc(x);
+}
+
 
 static void plp() {
     status = pull8() | FLAG_CONSTANT;
@@ -860,9 +870,9 @@ static void (*addrtable[256])() = {
 /* A */     imm, indx,  imm, indx,   zp,   zp,   zp,   zp,  imp,  imm,  imp,  imm, abso, abso, abso, abso, /* A */
 /* B */     rel, indy,  imp, indy,  zpx,  zpx,  zpy,  zpy,  imp, absy,  imp, absy, absx, absx, absy, absy, /* B */
 /* C */     imm, indx,  imm, indx,   zp,   zp,   zp,   zp,  imp,  imm,  imp,  imm, abso, abso, abso, abso, /* C */
-/* D */     rel, indy,  imp, indy,  zpx,  zpx,  zpx,  zpx,  imp, absy,  imp, absy, absx, absx, absx, absx, /* D */
+/* D */     rel, indy,  imp, indy,  zpx,  zpx,  zpx,  zpx,  imp, absy,  phx, absy, absx, absx, absx, absx, /* D */
 /* E */     imm, indx,  imm, indx,   zp,   zp,   zp,   zp,  imp,  imm,  imp,  imm, abso, abso, abso, abso, /* E */
-/* F */     rel, indy,  imp, indy,  zpx,  zpx,  zpx,  zpx,  imp, absy,  imp, absy, absx, absx, absx, absx  /* F */
+/* F */     rel, indy,  imp, indy,  zpx,  zpx,  zpx,  zpx,  imp, absy,  plx, absy, absx, absx, absx, absx  /* F */
 };
 
 static void (*optable[256])() = {

@@ -26,12 +26,12 @@ notcr:      cmp #$08              ; backspace?
             bpl nextchar          ; auto esc if line longer that 127
 
 escape:     lda #$5c              ; "\"
-            jsr ACIA_SEND
+            jsr MONCOUT
 
 getline:    lda #$0D              ; send CR 
-            jsr ACIA_SEND
+            jsr MONCOUT
             lda #$0A
-            jsr ACIA_SEND
+            jsr MONCOUT
 
             ldy #$01              ; initialize text index
 backspace:  dey 
@@ -39,6 +39,7 @@ backspace:  dey
 
 nextchar:   jsr MONRDKEY 
             bcc nextchar
+            jsr MONCOUT
             sta INPUTBUF, y
             cmp #$0D
             bne notcr
@@ -111,18 +112,18 @@ setaddr:    lda L-1,x             ; copy hex data to
 
 nxtprnt:    bne prdata            ; NE means no address to print
             lda #$0D              ; CR
-            jsr ACIA_SEND
+            jsr MONCOUT
             lda #$0A              ; LF
-            jsr ACIA_SEND
+            jsr MONCOUT
             lda XAMH              ; examine index high order byte
             jsr prbyte
             lda XAML              ; lower order examine index byte
             jsr prbyte            ; output it in hex format
             lda #$3a              ; ":"
-            jsr ACIA_SEND
+            jsr MONCOUT
 
 prdata:     lda #$20              ; blank
-            jsr ACIA_SEND
+            jsr MONCOUT
             lda (XAML,x)          ; get data byte at examine index
             jsr prbyte
 xamnext:    stx MODE              ; 0 -> MODE (xam mode)
@@ -154,7 +155,7 @@ prhex:      and #$0f           ; mask lsd for hex print
             bcc echo
             adc #$06
 
-echo:       jsr ACIA_SEND
+echo:       jsr MONCOUT
             rts
 
 NMI:        rti
