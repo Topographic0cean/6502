@@ -42,6 +42,8 @@ uint8_t display_read_data()
 
 void display_clear()
 {
+    if (iolog)
+        fprintf(iolog,"display clear\n");
     for (int i = 0; i < MAX_LINES; i++)
     {
         for (int j = 0; j < MAX_CHARS; j++)
@@ -165,6 +167,8 @@ void display_write_instruction()
 
 void display_set_status(uint8_t s)
 {
+    if (iolog)
+        fprintf(iolog,"display set status from %u to %u\n",status,s);
     // transition from E=0 to E=1 triggers the read or write
     if (!(status & DISPLAY_E) && (s & DISPLAY_E))
     {
@@ -191,6 +195,7 @@ void display_init(int io_log)
     if (io_log)
     {
         iolog = fopen("display.log", "w");
+        setvbuf(iolog, NULL, _IONBF, 0);
     }
     display_clear();
 }

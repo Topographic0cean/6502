@@ -1,13 +1,16 @@
-;  hex2dec -- expects a 16 bit number to be HEAP 
-;     HEAP is defined outside of this function
-;     Puts the decimal string representation in HEAP+4
+;  hex2dec -- expects a 16 bit number to be in H2DRAM 
+;     H2DRAM is defined outside of this function and needs to  10 bytes
+;     Puts the decimal string representation in H2DRAM+4
 .segment    "ROM"
 
-VALUE = $02           ; 2 bytes
+VALUE = H2DRAM        ; 2 bytes
 MOD10 = VALUE + 2     ; 2 bytes
 DECSTR = MOD10 + 2    ; 6 bytes
   
 HEXTODEC:
+  pha
+  phx
+  phy
   ; initialize remainder to 0
   lda #0
   sta DECSTR
@@ -45,6 +48,9 @@ hextodec_ignore:
   lda VALUE
   ora VALUE + 1
   bne hextodec_init
+  ply
+  plx 
+  pla
   rts
 
 hextodec_push:
@@ -53,12 +59,10 @@ hextodec_push:
   pha
 hextodec_p_loop:
   lda DECSTR, y
-  phx 
   sta DECSTR, y
   iny
-  plx
   bne hextodec_p_loop
   pla
-  sta DECSTR, y
+  sta DECSTR
   rts
 

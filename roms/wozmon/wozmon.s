@@ -11,7 +11,8 @@ H    = $29                            ; Hex value parsing High
 YSAV = $2A                            ; Used to see if hex value is given
 MODE = $2b                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 
-INPUTBUF = $0200
+H2DRAM     = $0002
+INPUTBUF   = $0200
 
 RESET:      cld
             jsr ACIA_SETUP

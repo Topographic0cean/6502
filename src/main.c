@@ -23,12 +23,12 @@ typedef struct options
 } Options;
 
 struct poptOption optionsTable[] = {
-    {"rom", 'r', POPT_ARG_STRING, 0, 'r', "ROM file to load", "file"},
     {"clocks", 'c', POPT_ARG_INT, 0, 'c', "Number of clocks to run", "clocks"},
-    {"sleep", 's', POPT_ARG_INT, 0, 's', "Sleep time between clocks", "nanoseconds"},
+    {"core", 'e', POPT_ARG_NONE, 0, 'e', "Dump core at end.", NULL},
     {"instructions", 'i', POPT_ARG_NONE, 0, 'i', "Print instructions", NULL},
     {"io", 'o', POPT_ARG_NONE, 0, 'o', "Print IO", NULL},
-    {"core", 'e', POPT_ARG_NONE, 0, 'e', "Dump core at end.", NULL},
+    {"rom", 'r', POPT_ARG_STRING, 0, 'r', "ROM file to load", "file"},
+    {"sleep", 's', POPT_ARG_INT, 0, 's', "Sleep time between clocks", "nanoseconds"},
     {"verbose", 'v', POPT_ARG_NONE, 0, 'v', "Verbose", NULL},
     POPT_AUTOHELP{NULL, 0, 0, NULL, 0}};
 

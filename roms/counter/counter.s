@@ -2,9 +2,9 @@
 .debuginfo
 .segment  "ROM"
 
-HEAP      = $0000 ; hex2dec needs 10 bytes
-DECIMAL   = $0004
-CLOCK     = $0010 ; 2 bytes
+H2DRAM    = $0500 ; hex2dec needs 10 bytes
+DECIMAL   = H2DRAM+4 
+CLOCK     = $1000 ; 2 bytes
 
 PCR = $600C
 IER = $600E
@@ -24,17 +24,17 @@ clock_loop:
   jsr DISPLAY_HOME
   sei
   lda CLOCK
-  sta HEAP
+  sta H2DRAM
   lda CLOCK + 1
-  sta HEAP + 1
+  sta H2DRAM + 1
   cli
   jsr HEXTODEC
-  ldy #$00
+  ldx #$00
 output:
-  lda (DECIMAL), y
+  lda DECIMAL, x
   beq done
   jsr DISPLAY_PUTC
-  iny
+  inx
   jmp output
 done:
   jmp clock_loop
@@ -51,4 +51,3 @@ vector_exit:
 .include "../lib/display.s"
 .include "../lib/hextodec.s"
 .include "../lib/vectors.s"
-
