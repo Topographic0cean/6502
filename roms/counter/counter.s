@@ -32,7 +32,7 @@ clock_loop:
   ldx #$00
 output:
   lda DECIMAL, x
-  beq done
+  beq clock_loop
   jsr DISPLAY_PUTC
   inx
   jmp output

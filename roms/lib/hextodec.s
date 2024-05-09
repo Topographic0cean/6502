@@ -12,7 +12,7 @@ HEXTODEC:
   phx
   phy
   ; initialize remainder to 0
-  lda #0
+  lda #$00
   sta DECSTR
 hextodec_init:
   lda #0
@@ -55,14 +55,21 @@ hextodec_ignore:
 
 hextodec_push:
   ; add char in a register to beginning of string
-  ldy #0
+  phx
+  phy
+  ldx #$00
+@loop:
   pha
-hextodec_p_loop:
-  lda DECSTR, y
-  sta DECSTR, y
-  iny
-  bne hextodec_p_loop
+  lda DECSTR, x
+  tay
   pla
-  sta DECSTR
+  sta DECSTR, x
+  inx
+  tya
+  beq @done
+  jmp @loop 
+@done:
+  sta DECSTR, x
+  ply
+  plx
   rts
-

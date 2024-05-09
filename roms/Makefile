@@ -5,8 +5,7 @@ MSB := $(wilcard msbasic/*.s)
 .DEFAULT_GOAL = all
 
 .PHONY: all clean
-all: hello.bin counter.bin serial.bin wozmon.bin msbasic.bin
-
+all: hello.bin counter.bin pi.bin serial.bin wozmon.bin msbasic.bin
 
 hello.bin: hello/hello.s $(LIB)
 	ca65 -o hello/hello.o hello/hello.s -l hello/hello.list
@@ -15,6 +14,11 @@ hello.bin: hello/hello.s $(LIB)
 counter.bin: counter/counter.s $(LIB)
 	ca65 -o counter/counter.o counter/counter.s -l counter/counter.list
 	ld65 -C counter/counter.cfg counter/counter.o -o bin/counter.bin
+
+pi.bin: pi/pi.s $(LIB)
+	ca65 -o pi/pi.o pi/pi.s -l pi/pi.list
+	ld65 -C pi/pi.cfg pi/pi.o -o bin/pi.bin
+
 
 serial.bin: serial/serial.s $(LIB)
 	ca65 -o serial/serial.o serial/serial.s -l serial/serial.list
