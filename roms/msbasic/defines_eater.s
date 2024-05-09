@@ -5,10 +5,12 @@ CONFIG_SCRTCH_ORDER := 2
 
 ; zero page
 ZP_START0 = $00
-ZP_START1 = $02
-ZP_START2 = $0C
-ZP_START3 = $62
-ZP_START4 = $6D
+; 2 bytes for the input buffer
+; 10 bytes for the display
+ZP_START1 = $0C
+ZP_START2 = $16
+ZP_START3 = $6C
+ZP_START4 = $77
 
 ; extra/override ZP variables
 USR				:= GORESTART ; XXX

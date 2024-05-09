@@ -2,16 +2,14 @@
 .debuginfo
 .segment  "ROM"
 
-DISPLAY   = $0000
-HEAP      = $0300
-CLOCK     = $0400 ; 2 bytes
+HEAP      = $0000 ; hex2dec needs 10 bytes
+DECIMAL   = $0004
+CLOCK     = $0010 ; 2 bytes
 
 PCR = $600C
 IER = $600E
 
 RESET:
-  lda #$ff
-  txs
   jsr DISPLAY_SETUP
   lda #$00
   sta CLOCK
@@ -23,6 +21,7 @@ RESET:
   sta PCR
 
 clock_loop:
+  jsr DISPLAY_HOME
   sei
   lda CLOCK
   sta HEAP
@@ -30,16 +29,15 @@ clock_loop:
   sta HEAP + 1
   cli
   jsr HEXTODEC
-  lda #$04
-  sta DISPLAY
-  lda #$03
-  sta DISPLAY+1
-  jsr DISPLAY_HOME
-  jsr DISPLAY_STRING
+  ldy #$00
+output:
+  lda (DECIMAL), y
+  beq done
+  jsr DISPLAY_PUTC
+  iny
+  jmp output
+done:
   jmp clock_loop
-
-do_nothing:
-  jmp do_nothing
 
 NMI:
 IRQ:

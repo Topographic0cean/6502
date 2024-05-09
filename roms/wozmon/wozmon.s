@@ -164,4 +164,6 @@ SAVE:
 LOAD:       rts
 
 .include "../lib/acia.s"
+.include "../lib/display.s"
+.include "../lib/hextodec.s"
 .include "../lib/vectors.s"

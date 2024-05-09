@@ -1,7 +1,9 @@
-
+;  hex2dec -- expects a 16 bit number to be HEAP 
+;     HEAP is defined outside of this function
+;     Puts the decimal string representation in HEAP+4
 .segment    "ROM"
 
-VALUE = HEAP          ; 2 bytes
+VALUE = $02           ; 2 bytes
 MOD10 = VALUE + 2     ; 2 bytes
 DECSTR = MOD10 + 2    ; 6 bytes
   

@@ -35,18 +35,6 @@ DISPLAY_HOME:
   jsr toggle_execute
   rts
 
-DISPLAY_STRING:
-    ; displays the string whose address is stored at DISPLAY
-  ldy #$00
-display_loop:
-  lda (DISPLAY),y
-  beq display_done
-  jsr DISPLAY_PUTC
-  iny
-  jmp display_loop
-display_done:
-  rts
-
 DISPLAY_PUTC:     ; put the character in the accumulator to
   pha             ; the LCD
   jsr wait_lcd
