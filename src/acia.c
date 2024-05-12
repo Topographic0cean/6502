@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include "acia.h"
 #include "6502.h"
+#include "window.h"
 
 #define ACIA_DATA 0
 #define ACIA_STATUS 1
@@ -18,6 +19,7 @@ static char ch;
 extern void quit(int signum);
 
 void* read_keyboard(void* p) {
+    /**/
     //setvbuf(stdin, NULL, _IONBF, 0);
     //fflush(stdin);
     struct termios term;
@@ -53,8 +55,6 @@ void* read_keyboard(void* p) {
     pthread_exit(0);
 }
 
-
-
 void acia_init(int v)
 {
     verbose = v;
@@ -63,11 +63,12 @@ void acia_init(int v)
 
 void acia_write(uint8_t address, uint8_t value)
 {
-    fflush(stdout);
+    //fflush(stdout);
     switch (address)
     {
     case ACIA_DATA:
-        write(1, &value, 1);
+        //write(1, &value, 1);
+        window_serial_putc(value);
         break;
     case ACIA_STATUS:
         // reset chip

@@ -5,6 +5,7 @@
 
 #include "ram.h"
 #include "display.h"
+#include "window.h"
 
 static FILE *iolog = NULL;
 
@@ -44,6 +45,7 @@ void display_clear()
 {
     if (iolog)
         fprintf(iolog,"display clear\n");
+        /*
     for (int i = 0; i < MAX_LINES; i++)
     {
         for (int j = 0; j < MAX_CHARS; j++)
@@ -54,10 +56,13 @@ void display_clear()
     }
     pos = 0;
     line = 0;
+    */
+   window_lcd_clear();
 }
 
 void display_write_char()
 {
+    /*
     LCD[line][pos] = data;
     pos++;
     if (pos >= MAX_CHARS)
@@ -73,6 +78,8 @@ void display_write_char()
     printf("%s\n", LCD[0]);
     printf("%s\n", LCD[1]);
     fflush(stdout);
+    */
+   window_lcd_putc(data);
 }
 
 void display_read_instruction()
@@ -138,6 +145,7 @@ void display_return_home()
 {
     pos = 0;
     line = 0;
+    window_lcd_home();
 }
 
 void display_write_instruction()

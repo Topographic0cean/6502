@@ -10,6 +10,7 @@
 #include "w65c22.h"
 #include "acia.h"
 #include "display.h"
+#include "window.h"
 
 typedef struct options
 {
@@ -97,7 +98,7 @@ void quit(int signum)
 void setup_interrupt_handlers()
 {
     signal(SIGUSR2, nmi_interrupt);
-    //signal(SIGINT, quit);
+    signal(SIGINT, quit);
     signal(SIGQUIT, quit);
     signal(SIGUSR1, maskable_interrupt);
     signal(SIGABRT, dump_core);
@@ -105,6 +106,7 @@ void setup_interrupt_handlers()
 
 void initialize( Options* options)
 {
+    window_init();
     setup_interrupt_handlers();
     ram_init(options->rom, options->instructions);
     w65c22_init(options->verbose);
@@ -154,6 +156,8 @@ int main(int argc, const char *argv[])
     }
     if (options.core == 1)
         dump_core();
+    
+    window_shutdown();
 
     exit(0);
 }

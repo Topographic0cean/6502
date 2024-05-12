@@ -2,8 +2,8 @@
 .debuginfo
 .segment  "ROM"
 
-H2DRAM    = $0500 ; hex2dec needs 10 bytes
-DECIMAL   = H2DRAM+4 
+HEAP      = $0500 ; hex2dec needs 10 bytes
+DECIMAL   = HEAP+4 
 
 PSTARTLO = $2800        ; 4,000,000,000
 PSTARTHI = $EE6B        
@@ -15,39 +15,36 @@ TDIV    = $006C
 REM     = $0070
 SUBSAVE = $0074
 
+RESET:      jsr DISPLAY_SETUP
+            lda #$00
+            sta N
+            sta N+1
+            lda #<PSTARTLO
+            sta PI
+            lda #>PSTARTLO
+            sta PI+1
+            lda #<PSTARTHI
+            sta PI+2
+            lda #>PSTARTHI
+            sta PI+3
 
-RESET:
-  jsr DISPLAY_SETUP
-  lda #$00
-  sta N
-  sta N+1
-  lda #<PSTARTLO
-  sta PI
-  lda #>PSTARTLO
-  sta PI+1
-  lda #<PSTARTHI
-  sta PI+2
-  lda #>PSTARTHI
-  sta PI+3
-pi_loop:
-  ; Display current PI estimate
-  lda PI+2
-  sta H2DRAM
-  lda PI+3 
-  sta H2DRAM+1
-  jsr display_num
+pi_loop:    ; Display current PI estimate
+            lda PI+2
+            sta HEAP
+            lda PI+3 
+            sta HEAP+1
+            jsr display_num
 
-  ; increment N
-  inc N
-  bne @inc_n_done
-  inc N + 1
-  bne @inc_n_done
-  inc N + 2
-  bne @inc_n_done
-  inc N + 3
-@inc_n_done:
+            ; increment N
+            inc N
+            bne @n_done
+            inc N + 1
+            bne @n_done
+            inc N + 2
+            bne @n_done
+            inc N + 3
 
-      ; TDIV is 2*N+1
+@n_done:    ; TDIV is 2*N+1
       lda N
       clc
       adc N

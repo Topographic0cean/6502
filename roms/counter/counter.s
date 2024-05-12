@@ -2,8 +2,8 @@
 .debuginfo
 .segment  "ROM"
 
-H2DRAM    = $0500 ; hex2dec needs 10 bytes
-DECIMAL   = H2DRAM+4 
+HEAP      = $0500 ; hex2dec needs 10 bytes
+DECIMAL   = HEAP+4 
 CLOCK     = $1000 ; 2 bytes
 
 PCR = $600C
@@ -24,9 +24,9 @@ clock_loop:
   jsr DISPLAY_HOME
   sei
   lda CLOCK
-  sta H2DRAM
+  sta HEAP
   lda CLOCK + 1
-  sta H2DRAM + 1
+  sta HEAP + 1
   cli
   jsr HEXTODEC
   ldx #$00

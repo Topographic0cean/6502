@@ -1,9 +1,9 @@
-;  hex2dec -- expects a 16 bit number to be in H2DRAM 
-;     H2DRAM is defined outside of this function and needs to  10 bytes
-;     Puts the decimal string representation in H2DRAM+4
+;  hex2dec -- expects a 16 bit number to be in HEAP 
+;     HEAP is defined outside of this function and needs to  10 bytes
+;     Puts the decimal string representation in HEAP+4
 .segment    "ROM"
 
-VALUE = H2DRAM        ; 2 bytes
+VALUE = HEAP          ; 2 bytes
 MOD10 = VALUE + 2     ; 2 bytes
 DECSTR = MOD10 + 2    ; 6 bytes
   

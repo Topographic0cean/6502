@@ -5,7 +5,7 @@ LD = gcc
 
 CFLAGS = -g -I/opt/homebrew/include
 LDFLAGS =  -L/opt/homebrew/lib
-LDLIBS = -lpopt
+LDLIBS = -lpopt -lncurses
 
 # build directories
 BIN = bin
