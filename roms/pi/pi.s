@@ -7,47 +7,53 @@ DECIMAL   = H2DRAM+4
 
 PSTART = $9C40        ; 40000
 
-PI     = $0050 ; 2 bytes
-N      = $0042
-TERM   = $0044
-TDIV   = $0046
-REM    = $0048
+; All variables are 4 byes
+PI     = $0050 
+N      = $0054
+TERM   = $0058
+TDIV   = $005C
+REM    = $0060
 
 
-RESET:
-  jsr DISPLAY_SETUP
-  lda #$00
-  sta N
-  sta N+1
-  lda #<PSTART
-  sta PI
-  lda #>PSTART
-  sta PI+1
-pi_loop:
-  ; Display current PI estimate
-  lda PI
-  sta H2DRAM
-  lda PI+1 
-  sta H2DRAM+1
-  jsr display_num
+RESET:  jsr DISPLAY_SETUP
+        lda #$00
+        sta N
+        sta N+1
 
-  ; increment N
-  inc N
-  bne @inc_n_done
-  inc N + 1
-@inc_n_done:
+        ; PI starts at 4,000,000
+        ; EE6B 2800 in hex
+        lda #$00
+        sta PI
+        lda #$28
+        sta PI+1
+        lda #$6B
+        sta PI+2
+        lda #$EE
+        sta PI+3
 
-  ; TDIV is 2*N+1
-  lda N
-  clc
-  adc N
-  adc #$01
-  sta TDIV
-  lda N+1
-  adc N+1
-  sta TDIV+1
+pi_loop: ; Display current PI estimate
+        lda PI
+        sta H2DRAM
+        lda PI+1 
+        sta H2DRAM+1
+        jsr display_num
 
-  ; term is PSTART / TDIV
+        ; increment N
+        inc N
+        bne @inc_n_done
+        inc N + 1
+
+@inc_n_done: ; TDIV is 2*N+1
+        lda N
+        clc
+        adc N
+        adc #$01
+        sta TDIV
+        lda N+1
+        adc N+1
+        sta TDIV+1
+
+        ; term is PSTART / TDIV
   lda #<PSTART
   sta TERM
   lda #>PSTART
