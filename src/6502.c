@@ -952,21 +952,31 @@ uint16_t string6502(char* str, uint16_t addr) {
     func = addrtable[op];
     if (func == zp || func == rel) {
         ea = (uint16_t)read6502((uint16_t)addr+1);
-        sprintf(str,"%02X %02X   %s $%02X",op,ea,labeltable[op], ea);
+        sprintf(str,"%02X %02X    %s $%02X  ",op,ea,labeltable[op], ea);
         return 2;
     }
     else if (func == absx) {
         ea = ((uint16_t)read6502(addr+1) | ((uint16_t)read6502(addr+2) << 8));
-        sprintf(str,"%02X %02X   %s ($%04X), X",op,ea,labeltable[op], ea);
+        sprintf(str,"%02X %02X %02X %s ($%04X),X",op,ea&0xFF,(ea>>8)&0xFF,labeltable[op], ea);
+        return 3;
+    }
+    else if (func == absy) {
+        ea = ((uint16_t)read6502(addr+1) | ((uint16_t)read6502(addr+2) << 8));
+        sprintf(str,"%02X %02X %02X %s ($%04X),Y",op,ea&0xFF,(ea>>8)&0xFF,labeltable[op], ea);
         return 3;
     }
     else if (func == imm) {
         ea = (uint16_t)read6502(addr+1);
-        sprintf(str,"%02X %02X   %s #$%02X",op,ea,labeltable[op], ea);
+        sprintf(str,"%02X %02X    %s #$%02X   ",op,ea,labeltable[op], ea);
         return 2;
     }
+    else if (func == abso) {
+        ea = (uint16_t)read6502(addr+1) | ((uint16_t)read6502(addr+2) << 8);
+        sprintf(str,"%02X %02X %02X %s $%04X    ",op,ea&0xFF,(ea>>8)&0xFF,labeltable[op], ea);
+        return 3;
+    }
     else {
-        sprintf(str,"%02X      %s ",op,labeltable[op]);
+        sprintf(str,"%02X       %s          ",op,labeltable[op]);
         return 1;
     }
 }

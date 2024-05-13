@@ -1,6 +1,7 @@
 #include <signal.h>
 
 #include "control.h"
+#include "window.h"
 
 static Control control;
 

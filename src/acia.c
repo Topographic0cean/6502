@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <termios.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <ncurses.h>
 #include "acia.h"
 #include "6502.h"
@@ -15,7 +14,6 @@
 #define ACIA_CTRL 3
 
 static int verbose = 0;
-static pthread_t tid;
 static char ch;
 
 void acia_read_keyboard()
@@ -25,19 +23,25 @@ void acia_read_keyboard()
     {
     case ERR:
         break;
-    case 0x18:
-        quit(0);
+    case KEY_RESIZE:
+        window_resize();
         break;
-    case 0x10:          // Control-P
-        cpu_pause();
-        break;
-    case 0x0E:          // Control-N
-        cpu_step();
+    case 0x06:          // Control-F
+        window_mem_forward();
         break;
     case 0x07:          // Control-G
         cpu_continue();
         break;
-    case 0x0A:
+    case 0x0E:          // Control-N
+        cpu_step();
+        break;
+    case 0x10:          // Control-P
+        cpu_pause();
+        break;
+    case 0x18:          // Control-X
+        quit(0);
+        break;
+    case 0x0A:          // Line Feed
         c = 0x0D;
     default:
         ch = c;

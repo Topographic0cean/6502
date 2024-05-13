@@ -31,10 +31,13 @@ void initialize()
 int main(int argc, const char *argv[])
 {
     struct timespec asleep;
+    struct timespec mssleep;
 
     options = process_options(argc, argv);
     initialize();
 
+    mssleep.tv_sec = 0;
+    mssleep.tv_nsec = 100000000;
     asleep.tv_sec = 0;
     asleep.tv_nsec = options->sleep;
     if (options->sleep == 0)
@@ -69,7 +72,7 @@ int main(int argc, const char *argv[])
         }
         else {
             window_show_state();
-            sleep(1);
+            nanosleep(&mssleep, NULL);
         }
         controls->step = 0;
         acia_read_keyboard();
