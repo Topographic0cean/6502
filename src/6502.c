@@ -104,6 +104,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 //6502 defines
 #define UNDOCUMENTED //when this is defined, undocumented opcodes are handled.
@@ -883,6 +884,27 @@ static void (*addrtable[256])() = {
 /* F */     rel, indy,  imp, indy,  zpx,  zpx,  zpx,  zpx,  imp, absy,  imp, absy, absx, absx, absx, absx  /* F */
 };
 
+static char labeltable[256][4] = {
+/*        |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  A  |  B  |  C  |  D  |  E  |  F  |      */
+/* 0 */     "BRK", "ORA", "NOP", "SLO", "NOP", "ORA", "ASL", "SLO", "PHP", "ORA", "ASL", "NOP", "NOP", "ORA", "ASL", "SLO", /* 0 */
+/* 1 */     "BPL", "ORA", "NOP", "SLO", "NOP", "ORA", "ASL", "SLO", "CLC", "ORA", "NOP", "SLO", "NOP", "ORA", "ASL", "SLO", /* 1 */
+/* 2 */     "JSR", "AND", "NOP", "RLA", "BIT", "AND", "ROL", "RLA", "PLP", "AND", "ROL", "NOP", "BIT", "AND", "ROL", "RLA", /* 2 */
+/* 3 */     "BMI", "AND", "NOP", "RLA", "NOP", "AND", "ROL", "RLA", "SEC", "AND", "NOP", "RLA", "NOP", "AND", "ROL", "RLA", /* 3 */
+/* 4 */     "RTI", "EOR", "NOP", "SRE", "NOP", "EOR", "LSR", "SRE", "PHA", "EOR", "LSR", "NOP", "JMP", "EOR", "LSR", "SRE", /* 4 */
+/* 5 */     "BVC", "EOR", "NOP", "SRE", "NOP", "EOR", "LSR", "SRE", "CLI", "EOR", "PHY", "SRE", "NOP", "EOR", "LSR", "SRE", /* 5 */
+/* 6 */     "RTS", "ADC", "NOP", "RRA", "NOP", "ADC", "ROR", "RRA", "PLA", "ADC", "ROR", "NOP", "JMP", "ADC", "ROR", "RRA", /* 6 */
+/* 7 */     "BVS", "ADC", "NOP", "RRA", "NOP", "ADC", "ROR", "RRA", "SEI", "ADC", "PLA", "RRA", "NOP", "ADC", "ROR", "RRA", /* 7 */
+/* 8 */     "NOP", "STA", "NOP", "SAX", "STY", "STA", "STX", "SAX", "DEY", "NOP", "TXA", "NOP", "STY", "STA", "STX", "SAX", /* 8 */
+/* 9 */     "BCC", "STA", "NOP", "NOP", "STY", "STA", "STX", "SAX", "TYA", "STA", "TXS", "NOP", "NOP", "STA", "NOP", "NOP", /* 9 */
+/* a */     "LDY", "LDA", "LDX", "LAX", "LDY", "LDA", "LDX", "LAX", "TAY", "LDA", "TAX", "NOP", "LDY", "LDA", "LDX", "LAX", /* a */
+/* b */     "BCS", "LDA", "NOP", "LAX", "LDY", "LDA", "LDX", "LAX", "CLV", "LDA", "TSX", "LAX", "LDY", "LDA", "LDX", "LAX", /* b */
+/* c */     "CPY", "CMP", "NOP", "DCP", "CPY", "CMP", "DEC", "DCP", "INY", "CMP", "DEX", "NOP", "CPY", "CMP", "DEC", "DCP", /* c */
+/* d */     "BNE", "CMP", "NOP", "DCP", "NOP", "CMP", "DEC", "DCP", "CLD", "CMP", "PHX", "DCP", "NOP", "CMP", "DEC", "DCP", /* d */
+/* e */     "CPX", "SBC", "NOP", "ISB", "CPX", "SBC", "INC", "ISB", "INX", "SBC", "NOP", "SBC", "CPX", "SBC", "INC", "ISB", /* e */
+/* f */     "BEQ", "SBC", "NOP", "ISB", "NOP", "SBC", "INC", "ISB", "SED", "SBC", "PLX", "ISB", "NOP", "SBC", "INC", "ISB"  /* f */
+};
+
+
 static void (*optable[256])() = {
 /*        |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  A  |  B  |  C  |  D  |  E  |  F  |      */
 /* 0 */      brk,  ora,  nop,  slo,  nop,  ora,  asl,  slo,  php,  ora,  asl,  nop,  nop,  ora,  asl,  slo, /* 0 */
@@ -923,6 +945,31 @@ static const uint32_t ticktable[256] = {
 /* F */      2,    5,    2,    8,    4,    4,    6,    6,    2,    4,    2,    7,    4,    4,    7,    7   /* F */
 };
 
+uint16_t string6502(char* str, uint16_t addr) {
+    uint16_t ea;
+    void (*func)();
+    uint8_t op = read6502(addr);
+    func = addrtable[op];
+    if (func == zp || func == rel) {
+        ea = (uint16_t)read6502((uint16_t)addr+1);
+        sprintf(str,"%02X %02X   %s $%02X",op,ea,labeltable[op], ea);
+        return 2;
+    }
+    else if (func == absx) {
+        ea = ((uint16_t)read6502(addr+1) | ((uint16_t)read6502(addr+2) << 8));
+        sprintf(str,"%02X %02X   %s ($%04X), X",op,ea,labeltable[op], ea);
+        return 3;
+    }
+    else if (func == imm) {
+        ea = (uint16_t)read6502(addr+1);
+        sprintf(str,"%02X %02X   %s #$%02X",op,ea,labeltable[op], ea);
+        return 2;
+    }
+    else {
+        sprintf(str,"%02X      %s ",op,labeltable[op]);
+        return 1;
+    }
+}
 
 void nmi6502() {
     push16(pc);

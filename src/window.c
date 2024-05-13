@@ -2,6 +2,7 @@
 
 #include "window.h"
 #include "ram.h"
+#include "6502.h"
 
 
 static int window_rows;
@@ -68,21 +69,23 @@ void window_shutdown() {
 extern uint16_t pc;
 extern uint8_t sp, a, x, y, status;
 void window_show_state() {
+    char label[16];
+    int r, c;
+    getmaxyx( registers, r, c);
+
     int pos = 1;
-    int pc_start = pc - 7;
-    int pc_end = pc + 8;
-    if (pc_start < 0) pc_start = 0;
-    if (pc_end > 0xFFFF) pc_start = 0xFFFF;
+    int pc_start = pc;
 
     mvwprintw(registers, pos++,1, "A    %02X",a );
     mvwprintw(registers, pos++,1, "X    %02X",x );
     mvwprintw(registers, pos++,1, "Y    %02X",y );
     mvwprintw(registers, pos++,1, "STAT %02X",status );
     mvwprintw(registers, pos++,1, "PC   %04X",pc );
-    pos++;
-
-    for (int i = pc_start; i <= pc_end; i++) {
-        mvwprintw(registers, pos++, 1, "%04X: %02X", i, ram_read(i));
+    pos = 1;
+    while (pos < r - 2) {
+        int adv = string6502(label, pc_start);
+        mvwprintw(registers, pos++, 15, "%04X: %s", pc_start, label);
+        pc_start += adv;
     }
     wrefresh(registers);
 }
