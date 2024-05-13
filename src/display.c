@@ -45,40 +45,11 @@ void display_clear()
 {
     if (iolog)
         fprintf(iolog,"display clear\n");
-        /*
-    for (int i = 0; i < MAX_LINES; i++)
-    {
-        for (int j = 0; j < MAX_CHARS; j++)
-        {
-            LCD[i][j] = ' ';
-        }
-        LCD[i][MAX_CHARS] = '\0';
-    }
-    pos = 0;
-    line = 0;
-    */
    window_lcd_clear();
 }
 
 void display_write_char()
 {
-    /*
-    LCD[line][pos] = data;
-    pos++;
-    if (pos >= MAX_CHARS)
-    {
-        pos = 0;
-        line++;
-        if (line >= lines)
-        {
-            line = 0;
-        }
-    }
-    printf("\033[2J");
-    printf("%s\n", LCD[0]);
-    printf("%s\n", LCD[1]);
-    fflush(stdout);
-    */
    window_lcd_putc(data);
 }
 

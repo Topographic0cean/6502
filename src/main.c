@@ -11,103 +11,16 @@
 #include "acia.h"
 #include "display.h"
 #include "window.h"
+#include "options.h"
+#include "control.h"
 
-typedef struct options
+Options *options;
+Control *controls;
+
+void initialize()
 {
-    char *rom;
-    int clocks;
-    int sleep;
-    int instructions;
-    int io;
-    int core;
-    int verbose;
-} Options;
-
-struct poptOption optionsTable[] = {
-    {"clocks", 'c', POPT_ARG_INT, 0, 'c', "Number of clocks to run", "clocks"},
-    {"core", 'e', POPT_ARG_NONE, 0, 'e', "Dump core at end.", NULL},
-    {"instructions", 'i', POPT_ARG_NONE, 0, 'i', "Print instructions", NULL},
-    {"io", 'o', POPT_ARG_NONE, 0, 'o', "Print IO", NULL},
-    {"rom", 'r', POPT_ARG_STRING, 0, 'r', "ROM file to load", "file"},
-    {"sleep", 's', POPT_ARG_INT, 0, 's', "Sleep time between clocks", "nanoseconds"},
-    {"verbose", 'v', POPT_ARG_NONE, 0, 'v', "Verbose", NULL},
-    POPT_AUTOHELP{NULL, 0, 0, NULL, 0}};
-
-static int nmi = 0;
-static int irq = 0;
-static int done = 0;
-
-void process_options(int argc, const char **argv, Options *options)
-{
-    int c;
-
-    options->rom = "rom.bin";
-    options->clocks = 0;
-    options->sleep = 1;
-    options->instructions = 0;
-    options->io = 0;
-    options->core = 0;
-    options->verbose = 0;
-
-    poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
-    while ((c = poptGetNextOpt(optCon)) >= 0)
-    {
-        switch (c)
-        {
-        case 'r':
-            options->rom = poptGetOptArg(optCon);
-            break;
-        case 'c':
-            options->clocks = atoi(poptGetOptArg(optCon));
-            break;
-        case 's':
-            options->sleep = atoi(poptGetOptArg(optCon));
-            break;
-        case 'i':
-            options->instructions = 1;
-            break;
-        case 'o':
-            options->io = 1;
-            break;
-        case 'e':
-            options->core = 1;
-            break;
-        case 'v':
-            options->verbose = 1;
-            break;
-        }
-    }
-    poptFreeContext(optCon);
-}
-
-void nmi_interrupt(int signum)
-{
-    nmi = 1;
-}
-
-void maskable_interrupt(int signum)
-{
-    irq = 1;
-}
-
-void quit(int signum)
-{
-    done = 1;
-}
-
-void setup_interrupt_handlers()
-{
-    signal(SIGUSR2, nmi_interrupt);
-    signal(SIGINT, quit);
-    signal(SIGQUIT, quit);
-    signal(SIGUSR1, maskable_interrupt);
-    signal(SIGABRT, dump_core);
-}
-
-void initialize( Options* options)
-{
+    controls = control_init();
     window_init();
-    setup_interrupt_handlers();
     ram_init(options->rom, options->instructions);
     w65c22_init(options->verbose);
     acia_init(options->verbose);
@@ -118,43 +31,53 @@ void initialize( Options* options)
 int main(int argc, const char *argv[])
 {
     struct timespec asleep;
-    Options options;
 
-    process_options(argc, argv, &options);
+    options = process_options(argc, argv);
+    initialize();
 
     asleep.tv_sec = 0;
-    asleep.tv_nsec = options.sleep;
-    if (options.sleep == 0)
+    asleep.tv_nsec = options->sleep;
+    if (options->sleep == 0)
     {
         asleep.tv_nsec = 1;
     }
 
-    initialize(&options);
-
     int c = 0;
-    while (options.clocks == 0 || c < options.clocks)
+    while (options->clocks == 0 || c < options->clocks)
     {
-        if (nmi == 1)
+        if (controls->nmi == 1)
         {
             nmi6502();
-            nmi = 0;
+            controls->nmi = 0;
         }
-        if (irq == 1)
+        if (controls->irq == 1)
         {
             irq6502();
-            irq = 0;
+            controls->irq = 0;
         }
-        if (done == 1)
+        if (controls->done == 1)
         {
             break;
         }
-        step6502();
-        w65c22_tick();
-        if (options.sleep > 0)
+        if (controls->go) {
+            controls->pause = 0;
+            controls->go = 0;
+        }
+        if (controls->pause == 0 || controls->step) {
+            step6502();
+            w65c22_tick();
+        }
+        else {
+            window_show_state();
+            sleep(1);
+        }
+        controls->step = 0;
+        acia_read_keyboard();
+        if (controls->pause == 0 && options->sleep > 0)
             nanosleep(&asleep, NULL);
         c++;
     }
-    if (options.core == 1)
+    if (options->core == 1)
         dump_core();
     
     window_shutdown();

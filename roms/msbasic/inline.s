@@ -125,7 +125,9 @@ GETLN:
         bne     L2465
     .else
         jsr     MONRDKEY
+        bcc     @no_key
         jsr     MONCOUT
+@no_key:
     .endif
     .ifdef OSI
         nop
