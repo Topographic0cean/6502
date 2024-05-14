@@ -26,6 +26,9 @@ void acia_read_keyboard()
     case KEY_RESIZE:
         window_resize();
         break;
+    case 0x02:          // Control-B
+        window_mem_backward();
+        break;
     case 0x06:          // Control-F
         window_mem_forward();
         break;

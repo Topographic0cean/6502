@@ -82,6 +82,7 @@ void window_show_state() {
     mvwprintw(registers, pos++,1, "Y    %02X",y );
     mvwprintw(registers, pos++,1, "STAT %02X",status );
     mvwprintw(registers, pos++,1, "PC   %04X",pc );
+    mvwprintw(registers, pos++,1, "SP   %02X",sp );
     pos = 1;
     while (pos < r - 2) {
         int adv = string6502(label, pc_start);
@@ -104,6 +105,14 @@ void window_show_state() {
 
 void window_mem_forward() {
     memory_address += 0x32;
+    if (memory_address > 0xFFFF)
+        memory_address -= 0x32;
+}
+
+void window_mem_backward() {
+    memory_address -= 0x32;
+    if (memory_address < 0)
+        memory_address = 0;
 }
 
 void window_resize() {
