@@ -38,12 +38,6 @@ int main(int argc, const char *argv[])
 
     mssleep.tv_sec = 0;
     mssleep.tv_nsec = 100000000;
-    asleep.tv_sec = 0;
-    asleep.tv_nsec = options->sleep;
-    if (options->sleep == 0)
-    {
-        asleep.tv_nsec = 1;
-    }
 
     int c = 0;
     while (options->clocks == 0 || c < options->clocks)
@@ -69,15 +63,16 @@ int main(int argc, const char *argv[])
         if (controls->pause == 0 || controls->step) {
             step6502();
             w65c22_tick();
+            asleep.tv_sec = 0;
+            asleep.tv_nsec = options->sleep;
+            nanosleep(&asleep, NULL);
+            controls->step = 0;
         }
         else {
             window_show_state();
             nanosleep(&mssleep, NULL);
         }
-        controls->step = 0;
         acia_read_keyboard();
-        if (controls->pause == 0 && options->sleep > 0)
-            nanosleep(&asleep, NULL);
         c++;
     }
     if (options->core == 1)

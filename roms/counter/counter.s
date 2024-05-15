@@ -2,8 +2,8 @@
 .debuginfo
 .segment  "ROM"
 
-HEAP      = $0500 ; hex2dec needs 10 bytes
-DECIMAL   = HEAP+4 
+HEAP      = $0502 ; hex2dec needs 10 bytes
+DECIMAL   = HEAP+12 
 CLOCK     = $1000 ; 2 bytes
 
 PCR = $600C
@@ -14,6 +14,8 @@ RESET:
   lda #$00
   sta CLOCK
   sta CLOCK+1
+  sta CLOCK+2
+  sta CLOCK+3
 
   lda #$82    ; set CA1
   sta IER
@@ -27,6 +29,10 @@ clock_loop:
   sta HEAP
   lda CLOCK + 1
   sta HEAP + 1
+  lda CLOCK + 2
+  sta HEAP + 2
+  lda CLOCK + 3
+  sta HEAP + 3
   cli
   jsr HEXTODEC
   ldx #$00

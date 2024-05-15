@@ -21,7 +21,7 @@ Options* process_options(int argc, const char **argv)
 
     options.rom = "rom.bin";
     options.clocks = 0;
-    options.sleep = 1;
+    options.sleep = 10000;
     options.instructions = 0;
     options.io = 0;
     options.core = 0;
