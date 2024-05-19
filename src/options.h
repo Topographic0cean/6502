@@ -1,6 +1,8 @@
+#pragma once
 
 typedef struct options
 {
+    int paused;
     char *rom;
     int clocks;
     int sleep;

@@ -44,12 +44,12 @@ void setup_interrupt_handlers()
     signal(SIGUSR1, maskable_interrupt);
 }
 
-Control* control_init() {
+Control* control_init(Options* options) {
     setup_interrupt_handlers();
     control.go = 0;
     control.irq = 0;
     control.nmi = 0;
-    control.pause = 0;
+    control.pause = options->paused;
     control.done = 0;
     control.step = 0;
     return &control;

@@ -19,7 +19,7 @@ Control *controls;
 
 void initialize()
 {
-    controls = control_init();
+    controls = control_init(options);
     window_init();
     ram_init(options->rom, options->instructions);
     w65c22_init(options->verbose);

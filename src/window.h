@@ -1,3 +1,4 @@
+#pragma once
 
 extern void window_init();
 extern void window_lcd_clear();

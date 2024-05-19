@@ -11,14 +11,16 @@ PSTARTHI = $EE6B
 PI      = $0050 ; 4 bytes
 N       = $0058
 TERM    = $0060
-TDIV    = $0068
-REM     = $0070
-SUBSAVE = $0078
+TDIV    = $0070
+REM     = $0078
+SUBSAVE = $0080
 
 RESET:      jsr DISPLAY_SETUP
             lda #$00
             sta N
             sta N+1
+            sta N+2
+            sta N+3
             lda #<PSTARTLO
             sta PI
             lda #>PSTARTLO
@@ -52,7 +54,6 @@ pi_loop:    ; Display current PI estimate
             lda N
             clc
             adc N
-            adc #$01
             sta TDIV
             lda N+1
             adc N+1
@@ -63,6 +64,14 @@ pi_loop:    ; Display current PI estimate
             lda N+3
             adc N+3
             sta TDIV+3
+            inc TDIV
+            bne @tdiv_done
+            inc TDIV+1
+            bne @tdiv_done
+            inc TDIV+2
+            bne @tdiv_done
+            inc TDIV+3
+@tdiv_done:
 
             ; term is PSTART / TDIV
             lda #<PSTARTLO

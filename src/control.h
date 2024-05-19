@@ -1,4 +1,8 @@
+#pragma once
+
 #include <stdint.h>
+
+#include "options.h"
 
 typedef struct Control  {
     uint8_t go;
@@ -15,4 +19,4 @@ extern void quit(int signum);
 extern void cpu_pause();
 extern void cpu_step();
 extern void cpu_continue();
-extern Control* control_init();
+extern Control* control_init(Options* options);
