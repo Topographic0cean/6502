@@ -4,6 +4,7 @@ typedef struct options
 {
     int paused;
     char *rom;
+    char *load;
     int clocks;
     int sleep;
     int instructions;

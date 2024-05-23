@@ -11,11 +11,12 @@ H    = $29                            ; Hex value parsing High
 YSAV = $2A                            ; Used to see if hex value is given
 MODE = $2b                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 
-HEAP       = $0002
 INPUTBUF   = $0200
+HEAP       = $0400
 
 RESET:      cld
             jsr ACIA_SETUP
+            jsr DISPLAY_SETUP
             lda #$1b
             cli 
 
@@ -166,4 +167,5 @@ LOAD:       rts
 
 .include "../lib/acia.s"
 .include "../lib/display.s"
+.include "../lib/hextodec.s"
 .include "../lib/vectors.s"

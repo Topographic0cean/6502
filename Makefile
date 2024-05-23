@@ -12,6 +12,7 @@ BIN = bin
 OBJ = obj
 SRC = src
 ROMS = roms
+PROGS = progs
 
 SOURCES := $(wildcard $(SRC)/*.c $(SRC)/*.cc $(SRC)/*.cpp $(SRC)/*.cxx)
 
@@ -30,11 +31,14 @@ LINK.o = $(LD) $(LDFLAGS)  $(OBJECTS) -o $@ $(LDLIBS)
 
 .DEFAULT_GOAL = all
 
-.PHONY: all $(ROMS)
-all: $(BIN)/$(EXE) $(ROMS)
+.PHONY: all $(ROMS) $(PROGS)
+all: $(BIN)/$(EXE) $(ROMS) $(PROGS)
 
 $(ROMS):
 	make -C $(ROMS)
+
+$(PROGS):
+	make -C $(PROGS)
 
 $(BIN)/$(EXE): $(SRC) $(OBJ) $(BIN) $(OBJECTS)
 	$(LINK.o)

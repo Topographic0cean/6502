@@ -5,4 +5,5 @@ obj
 *.list
 *.lbl
 *.o
+*.load
 tmp

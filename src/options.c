@@ -10,6 +10,7 @@ struct poptOption optionsTable[] = {
     {"core", 'e', POPT_ARG_NONE, 0, 'e', "Dump core at end.", NULL},
     {"instructions", 'i', POPT_ARG_NONE, 0, 'i', "Print instructions", NULL},
     {"io", 'o', POPT_ARG_NONE, 0, 'o', "Print IO", NULL},
+    {"load", 'l', POPT_ARG_STRING, 0, 'l', "Load prog file", NULL},
     {"paused", 'p', POPT_ARG_NONE, 0, 'p', "Paused at start", NULL},
     {"rom", 'r', POPT_ARG_STRING, 0, 'r', "ROM file to load", "file"},
     {"sleep", 's', POPT_ARG_INT, 0, 's', "Sleep time between clocks", "nanoseconds"},
@@ -20,6 +21,7 @@ Options* process_options(int argc, const char **argv)
 {
     int c;
 
+    options.load = "";
     options.paused = 0;
     options.rom = "rom.bin";
     options.clocks = 0;
@@ -34,6 +36,9 @@ Options* process_options(int argc, const char **argv)
     {
         switch (c)
         {
+        case 'l':
+            options.load = poptGetOptArg(optCon);
+            break;
         case 'p':
             options.paused = 1;
             break;

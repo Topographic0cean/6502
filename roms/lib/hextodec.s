@@ -3,10 +3,10 @@
 ;     Puts the decimal string representation in HEAP+4
 .segment    "ROM"
 
-VALUE = HEAP          ; 4 bytes
-MOD10 = VALUE + 4     ; 4 bytes
-SAVE  = MOD10 + 4     ;
-DECSTR = SAVE + 4    ; 12 bytes
+VALUE     = HEAP          ; 4 bytes
+MOD10     = VALUE + 4     ; 4 bytes
+DIVSAVE   = MOD10 + 4     ;
+DECSTR    = DIVSAVE + 4    ; 12 bytes
   
 HEXTODEC:
   pha
@@ -37,24 +37,24 @@ hextodec_loop:
   sec 
   lda MOD10
   sbc #10
-  sta SAVE
+  sta DIVSAVE
   lda MOD10 + 1
   sbc #0
-  sta SAVE + 1
+  sta DIVSAVE + 1
   lda MOD10 + 2
   sbc #0
-  sta SAVE + 2
+  sta DIVSAVE + 2
   lda MOD10 + 3
   sbc #0
-  sta SAVE + 3
+  sta DIVSAVE + 3
   bcc hextodec_ignore ; branch if dividend < divisor
-  lda SAVE
+  lda DIVSAVE
   sta MOD10
-  lda SAVE + 1
+  lda DIVSAVE + 1
   sta MOD10 + 1
-  lda SAVE + 2
+  lda DIVSAVE + 2
   sta MOD10 + 2
-  lda SAVE + 3
+  lda DIVSAVE + 3
   sta MOD10 + 3
 hextodec_ignore:
   dex

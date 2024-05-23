@@ -21,7 +21,7 @@ void initialize()
 {
     controls = control_init(options);
     window_init();
-    ram_init(options->rom, options->instructions);
+    ram_init(options);
     w65c22_init(options->verbose);
     acia_init(options->verbose);
     display_init(options->io);

@@ -54,4 +54,3 @@ Control* control_init(Options* options) {
     control.step = 0;
     return &control;
 }
-

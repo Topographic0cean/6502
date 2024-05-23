@@ -10,3 +10,4 @@ extern void window_shutdown();
 extern void window_mem_forward();
 extern void window_mem_backward();
 extern void window_resize();
+extern void windows_status(char* status);

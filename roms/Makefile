@@ -20,7 +20,6 @@ $(BIN)/pi.bin: pi/pi.s $(LIB)
 	ca65 -o pi/pi.o pi/pi.s -l pi/pi.list
 	ld65 -C pi/pi.cfg pi/pi.o -o $(BIN)/pi.bin
 
-
 $(BIN)/serial.bin: serial/serial.s $(LIB)
 	ca65 -o serial/serial.o serial/serial.s -l serial/serial.list
 	ld65 -C serial/serial.cfg serial/serial.o -o $(BIN)/serial.bin

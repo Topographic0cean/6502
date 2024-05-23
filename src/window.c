@@ -43,6 +43,10 @@ void window_init() {
     wrefresh(registers);
 }
 
+void windows_status(char* status) {
+    wprintw(serial,status);
+}
+
 void window_lcd_clear() {
     wclear(lcd);
     box(lcd,0,0);
