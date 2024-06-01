@@ -29,5 +29,5 @@
 .endif
 
 .ifdef EATER
-.include "../wozmon/wozmon.s"
+.include "../wozmon.s"
 .endif

@@ -165,7 +165,7 @@ NMI:        rti
 SAVE:
 LOAD:       rts
 
-.include "../lib/acia.s"
-.include "../lib/display.s"
-.include "../lib/hextodec.s"
-.include "../lib/vectors.s"
+.include "acia.s"
+.include "display.s"
+.include "hextodec.s"
+.include "vectors.s"

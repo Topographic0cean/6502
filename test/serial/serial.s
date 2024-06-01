@@ -33,5 +33,5 @@ long_message: .byte "This is a much longer message that may overrun the output a
 NMI:
   rti
 
-.include "../lib/acia.s"
-.include "../lib/vectors.s"
+.include "../../rom/acia.s"
+.include "../../rom/vectors.s"

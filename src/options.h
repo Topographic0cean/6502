@@ -10,7 +10,6 @@ typedef struct options
     int instructions;
     int io;
     int core;
-    int verbose;
 } Options;
 
 extern Options* process_options(int argc, const char **argv);

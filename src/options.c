@@ -23,13 +23,12 @@ Options* process_options(int argc, const char **argv)
 
     options.load = "";
     options.paused = 0;
-    options.rom = "rom.bin";
+    options.rom = "rom/rom.bin";
     options.clocks = 0;
-    options.sleep = 10000;
+    options.sleep = 0;
     options.instructions = 0;
     options.io = 0;
     options.core = 0;
-    options.verbose = 0;
 
     poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
     while ((c = poptGetNextOpt(optCon)) >= 0)
@@ -59,9 +58,6 @@ Options* process_options(int argc, const char **argv)
             break;
         case 'e':
             options.core = 1;
-            break;
-        case 'v':
-            options.verbose = 1;
             break;
         }
     }

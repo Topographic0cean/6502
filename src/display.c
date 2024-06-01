@@ -6,8 +6,8 @@
 #include "ram.h"
 #include "display.h"
 #include "window.h"
+#include "logger.h"
 
-static FILE *iolog = NULL;
 
 static uint8_t data = 0;
 static uint8_t status = 0;
@@ -31,6 +31,8 @@ uint8_t lines = MAX_LINES;
 uint8_t line = 0;
 uint8_t pos = 0;
 
+int verbose = 0;
+
 void display_write_data(uint8_t d)
 {
     data = d;
@@ -43,8 +45,8 @@ uint8_t display_read_data()
 
 void display_clear()
 {
-    if (iolog)
-        fprintf(iolog,"display clear\n");
+    if (verbose)
+        log("display clear\n");
    window_lcd_clear();
 }
 
@@ -55,20 +57,20 @@ void display_write_char()
 
 void display_read_instruction()
 {
-    if (iolog)
-        fprintf(iolog, "display read instruction %x\n", status);
+    if (verbose)
+        log("display read instruction %x\n", status);
     data = 0;
 }
 void display_set_ddram_address()
 {
-    if (iolog)
-        fprintf(iolog,"set ddram address\n");
+    if (verbose)
+        log("set ddram address\n");
     
 }
 void display_set_cgram_address()
 {
-   if (iolog)
-        fprintf(iolog,"set cgram address\n");
+   if (verbose)
+        log("set cgram address\n");
 }
 void display_function_set()
 {
@@ -84,14 +86,14 @@ void display_function_set()
         font = FONT5_10;
     else
         font = FONT5_8;
-    if (iolog)
-        fprintf(iolog,"display function set bits=%d lines=%d font=%s\n", bits, lines, (font == FONT5_10) ? "5x10" : "5x8");
+    if (verbose)
+        log("display function set bits=%d lines=%d font=%s\n", bits, lines, (font == FONT5_10) ? "5x10" : "5x8");
 }
 
 void display_shift()
 {
-    if (iolog)
-        fprintf(iolog,"display shift\n");
+    if (verbose)
+        log("display shift\n");
 }
 
 void display_display_ctl()
@@ -99,8 +101,8 @@ void display_display_ctl()
     display = data & 0x04;
     cursor = data & 0x02;
     blink = data & 0x01;
-    if (iolog)
-        fprintf(iolog,"display display ctl display %s cursor %s blink %s\n", data & 0x04 ? "on" : "off", data & 0x02 ? "on" : "off", data & 0x01 ? "on" : "off");
+    if (verbose)
+        log("display display ctl display %s cursor %s blink %s\n", data & 0x04 ? "on" : "off", data & 0x02 ? "on" : "off", data & 0x01 ? "on" : "off");
 }
 
 void display_mode_set()
@@ -108,8 +110,8 @@ void display_mode_set()
     shift_cursor = data & 0x02;
     shift_display = data & 0x01;
 
-    if (iolog)
-        fprintf(iolog,"display mode set %s %s\n", (shift_cursor) ? "cursor shift" : "cursor move", (shift_display) ? "display shift" : "display move");
+    if (verbose)
+        log("display mode set %s %s\n", (shift_cursor) ? "cursor shift" : "cursor move", (shift_display) ? "display shift" : "display move");
 }
 
 void display_return_home()
@@ -121,8 +123,8 @@ void display_return_home()
 
 void display_write_instruction()
 {
-    if (iolog)
-        fprintf(iolog,"display write instruction %d\n", data);
+    if (verbose)
+        log("display write instruction %d\n", data);
     if (data & 0x80)
         display_set_ddram_address();
     else if (data & 0x40)
@@ -140,14 +142,14 @@ void display_write_instruction()
     else if (data & 0x01)
         display_clear();
     else
-        if (iolog)
-        fprintf(iolog, "display no op %d\n", data);
+        if (verbose)
+        log("display no op %d\n", data);
 }
 
 void display_set_status(uint8_t s)
 {
-    if (iolog)
-        fprintf(iolog,"display set status from %u to %u\n",status,s);
+    if (verbose)
+        log("display set status from %u to %u\n",status,s);
     // transition from E=0 to E=1 triggers the read or write
     if (!(status & DISPLAY_E) && (s & DISPLAY_E))
     {
@@ -171,10 +173,6 @@ void display_set_status(uint8_t s)
 
 void display_init(int io_log)
 {
-    if (io_log)
-    {
-        iolog = fopen("display.log", "w");
-        setvbuf(iolog, NULL, _IONBF, 0);
-    }
+    verbose = io_log;
     display_clear();
 }

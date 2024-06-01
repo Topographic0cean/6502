@@ -7,8 +7,8 @@
 #include "ram.h"
 #include "window.h"
 
-static FILE *ilog = NULL;
 static char RAM[ROM_END + 1];
+static int verbose = 0;
 
 static char status[128];
 
@@ -80,8 +80,7 @@ void load_program(char *filename)
 void ram_init(Options *options)
 {
     memset(RAM, 0, sizeof(RAM));
-    if (options->instructions)
-        ilog = fopen("instructions.log", "w");
+    verbose = options->instructions;
 
     // read the binary file into high 32K of RAM
     FILE *file = fopen(options->rom, "rb");
@@ -114,7 +113,6 @@ uint8_t ram_read(uint16_t address)
 
 void dump_core()
 {
-    printf("dumping core\n");
     FILE *f = fopen("core.bin", "wb");
     if (f == NULL)
     {

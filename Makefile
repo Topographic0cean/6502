@@ -11,8 +11,8 @@ LDLIBS = -lpopt -lncurses
 BIN = bin
 OBJ = obj
 SRC = src
-ROMS = roms
-PROGS = progs
+ROM = rom
+PROGS = programs
 
 SOURCES := $(wildcard $(SRC)/*.c $(SRC)/*.cc $(SRC)/*.cpp $(SRC)/*.cxx)
 
@@ -31,11 +31,11 @@ LINK.o = $(LD) $(LDFLAGS)  $(OBJECTS) -o $@ $(LDLIBS)
 
 .DEFAULT_GOAL = all
 
-.PHONY: all $(ROMS) $(PROGS)
-all: $(BIN)/$(EXE) $(ROMS) $(PROGS)
+.PHONY: all $(ROM) $(PROGS)
+all: $(BIN)/$(EXE) $(ROM) $(PROGS)
 
-$(ROMS):
-	make -C $(ROMS)
+$(ROM):
+	make -C $(ROM)
 
 $(PROGS):
 	make -C $(PROGS)
@@ -65,7 +65,8 @@ clean:
 	$(RM) -r $(OBJ)
 	$(RM) -r $(BIN)
 	$(RM) *.log *.bin
-	make -C $(ROMS) clean
+	make -C $(ROM) clean
+	make -C $(PROGS) clean
 
 -include $(DEPENDS)
 

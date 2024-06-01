@@ -13,17 +13,20 @@
 #include "window.h"
 #include "options.h"
 #include "control.h"
+#include "logger.h"
 
 Options *options;
 Control *controls;
 
 void initialize()
 {
+    options = process_options(argc, argv);
+    logger_init(options->instructions|options->io);
     controls = control_init(options);
     window_init();
     ram_init(options);
-    w65c22_init(options->verbose);
-    acia_init(options->verbose);
+    w65c22_init(options->io);
+    acia_init(options->io);
     display_init(options->io);
     reset6502();
 }
@@ -33,11 +36,12 @@ int main(int argc, const char *argv[])
     struct timespec asleep;
     struct timespec mssleep;
 
-    options = process_options(argc, argv);
     initialize();
 
     mssleep.tv_sec = 0;
     mssleep.tv_nsec = 100000000;
+    asleep.tv_sec = 0;
+    asleep.tv_nsec = options->sleep;
 
     int c = 0;
     while (options->clocks == 0 || c < options->clocks)
@@ -63,8 +67,6 @@ int main(int argc, const char *argv[])
         if (controls->pause == 0 || controls->step) {
             step6502();
             w65c22_tick();
-            asleep.tv_sec = 0;
-            asleep.tv_nsec = options->sleep;
             nanosleep(&asleep, NULL);
             controls->step = 0;
         }
@@ -77,8 +79,6 @@ int main(int argc, const char *argv[])
     }
     if (options->core == 1)
         dump_core();
-    
     window_shutdown();
-
     exit(0);
 }
