@@ -1,6 +1,5 @@
 .setcpu   "65C02"
 .debuginfo
-
 .include "defines.s"
 
 DECIMAL   = HEAP+12 
@@ -8,15 +7,17 @@ DECIMAL   = HEAP+12
 PSTARTLO = $2800        ; 4,000,000,000
 PSTARTHI = $EE6B        
 
-PI      = $0050 ; 4 bytes
-N       = $0058
-TERM    = $0060
-TDIV    = $0070
-REM     = $0078
-SUBSAVE = $0080
+;LED     = $40 ; Make blinky lights
+PI      = $50 ; Each of thse vars are 4 bytes
+N       = $58
+TERM    = $60
+TDIV    = $70
+REM     = $78
+SUBSAVE = $80
 
 .org START
             lda #$00
+            ;sta LED
             sta N
             sta N+1
             sta N+2
@@ -30,7 +31,10 @@ SUBSAVE = $0080
             lda #>PSTARTHI
             sta PI+3
 
-pi_loop:    ; Display current PI estimate
+pi_loop:    ;lda LED           ; blink some lights
+            ;and #%00011111    ; top 3 bits are for LCD
+            ;jsr DISPLAY_PORT
+            ;inc LED
             lda PI
             sta HEAP
             lda PI+1 
@@ -168,7 +172,3 @@ L1:         ASL TERM    ;Shift hi bit of TERM into REM
             jmp @output
       @done:
             rts
-
-      NMI:
-      IRQ:  rti
-

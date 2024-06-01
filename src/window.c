@@ -4,7 +4,6 @@
 #include "ram.h"
 #include "6502.h"
 
-
 static int window_rows;
 static int window_cols;
 
@@ -24,7 +23,7 @@ void window_init() {
     raw();
     timeout(0);
 
-    getmaxyx( stdscr, window_rows, window_cols);
+    getmaxyx(stdscr, window_rows, window_cols);
 
     memory = newwin(window_rows/2,window_cols/2,0,0);
     lcd = newwin(4,window_cols/2,0,window_cols/2);
@@ -145,5 +144,4 @@ void window_resize() {
     wrefresh(lcd);
     wrefresh(registers);
     wrefresh(serial);
-
 }

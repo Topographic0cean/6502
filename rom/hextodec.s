@@ -1,12 +1,13 @@
-;  hex2dec -- expects a 16 bit number to be in HEAP 
-;     HEAP is defined outside of this function and needs to  10 bytes
-;     Puts the decimal string representation in HEAP+4
+;  hex2dec -- expects a 32 bit number to be in HEAP 
+;     HEAP is defined outside of this function and
+;          needs to be at least 24 bytes
+;     Puts the decimal string representation in HEAP+12
 .segment    "ROM"
 
 VALUE     = HEAP          ; 4 bytes
 MOD10     = VALUE + 4     ; 4 bytes
 DIVSAVE   = MOD10 + 4     ;
-DECSTR    = DIVSAVE + 4    ; 12 bytes
+DECSTR    = DIVSAVE + 4   ; 12 bytes
   
 HEXTODEC:
   pha
