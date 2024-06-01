@@ -18,11 +18,11 @@
 Options *options;
 Control *controls;
 
-void initialize()
+void initialize(int argc, const     char* argv[])
 {
     options = process_options(argc, argv);
-    logger_init(options->instructions|options->io);
     controls = control_init(options);
+    logger_init(options->instructions|options->io);
     window_init();
     ram_init(options);
     w65c22_init(options->io);
@@ -31,12 +31,17 @@ void initialize()
     reset6502();
 }
 
+void shutdown() {
+    window_shutdown();
+    logger_close();
+}
+
 int main(int argc, const char *argv[])
 {
     struct timespec asleep;
     struct timespec mssleep;
 
-    initialize();
+    initialize(argc,argv);
 
     mssleep.tv_sec = 0;
     mssleep.tv_nsec = 100000000;
@@ -79,6 +84,7 @@ int main(int argc, const char *argv[])
     }
     if (options->core == 1)
         dump_core();
-    window_shutdown();
+
+    shutdown();
     exit(0);
 }

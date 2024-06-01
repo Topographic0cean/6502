@@ -52,14 +52,19 @@ void acia_read_keyboard()
         default:
             input_buffer[write_buff] = c;
             write_buff = (write_buff+1)%1024;
-            maskable_interrupt(0);
         }
     }
+    if (read_buff != write_buff)
+        maskable_interrupt(0);
 }
 
 void acia_init(int v)
 {
     verbose = v;
+    if (verbose)
+        log("ACIA verbose output\n");
+    else
+        log("ACIA no output\n");
 }
 
 void acia_write(uint8_t address, uint8_t value)
@@ -89,10 +94,8 @@ uint8_t acia_read(uint8_t address)
         if (read_buff != write_buff) {
             char c = input_buffer[read_buff];
             read_buff = (read_buff+1)%1024;
-            if (verbose) 
-                log("acia read %c\n",c);
-            if (read_buff != write_buff)
-                maskable_interrupt(0);
+            if (verbose) log("acia read %c\n",c);
+            if (read_buff != write_buff) maskable_interrupt(0);
             return c;
         }
         break;
