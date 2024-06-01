@@ -14,15 +14,26 @@
 #define ACIA_CMD 2
 #define ACIA_CTRL 3
 
+#define BUF_SIZE 16
+
 static int verbose = 0;
-static char input_buffer[1024];
+static char input_buffer[BUF_SIZE];
 static int read_buff = 0;
 static int write_buff = 0;
+
+int buff_not_full() {
+    int w = (write_buff+1)%BUF_SIZE;
+    if (w != read_buff)
+        return 1;
+    return 0;
+}
+
+uint16_t delay = 0;
 
 void acia_read_keyboard()
 {
     int c;
-    while ((c = getch()) != ERR)
+    while (buff_not_full() && (c = getch()) != ERR)
     {
         switch (c)
         {
@@ -51,11 +62,13 @@ void acia_read_keyboard()
             c = 0x0D;
         default:
             input_buffer[write_buff] = c;
-            write_buff = (write_buff+1)%1024;
+            write_buff = (write_buff+1)%BUF_SIZE;
+            if (verbose) log("acia_read_keyboard %c (%d,%d)\n",c,read_buff,write_buff);
         }
     }
-    if (read_buff != write_buff)
+    if (!delay && read_buff != write_buff)
         maskable_interrupt(0);
+    delay = (delay+1)%10000;
 }
 
 void acia_init(int v)
@@ -63,8 +76,6 @@ void acia_init(int v)
     verbose = v;
     if (verbose)
         log("ACIA verbose output\n");
-    else
-        log("ACIA no output\n");
 }
 
 void acia_write(uint8_t address, uint8_t value)
@@ -93,9 +104,7 @@ uint8_t acia_read(uint8_t address)
     case ACIA_DATA:
         if (read_buff != write_buff) {
             char c = input_buffer[read_buff];
-            read_buff = (read_buff+1)%1024;
-            if (verbose) log("acia read %c\n",c);
-            if (read_buff != write_buff) maskable_interrupt(0);
+            read_buff = (read_buff+1)%BUF_SIZE;
             return c;
         }
         break;

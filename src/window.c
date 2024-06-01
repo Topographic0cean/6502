@@ -21,9 +21,9 @@ void window_init() {
     initscr();
 
     noecho();
-    cbreak(); // raw();
+    raw();
     timeout(0);
-    
+
     getmaxyx( stdscr, window_rows, window_cols);
 
     memory = newwin(window_rows/2,window_cols/2,0,0);
