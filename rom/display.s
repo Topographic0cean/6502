@@ -13,7 +13,10 @@ E  = %10000000
 RW = %01000000
 RS = %00100000
 
-DISPLAY_SETUP:  ; setup the display to 8 bits 2 lines
+DISPLAY_SETUP:  ; initial port a to 0
+                lda #$00
+                sta PORT
+                ; setup the display to 8 bits 2 lines
                 lda #%11111111  ; all output
                 sta DDRB        
                 lda #%11111111  ; all output
