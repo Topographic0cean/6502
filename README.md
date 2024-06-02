@@ -1,10 +1,10 @@
 # 6502
 
-A 6502 emulator based on fake6502 and Ben Eater's hardware design.
+A 6502 emulator based on fake6502 and Ben Eater's hardware design.   The object is to create a simple test harness to prototype and debug BASIC and 6502 assembly programs.
 
 # Dependencies
 
-On Mac, install popt with brew install popt.  
+On Mac, install popt with "brew install popt".  
 
 Install cc65 from https://cc65.github.io/
 
