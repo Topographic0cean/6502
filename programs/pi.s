@@ -42,6 +42,7 @@ SUBSAVE     = $80
             sta PI+2
             lda #>PSTARTHI
             sta PI+3
+            jsr DISPLAY_CLEAR
 
 pi_loop:    inc COUNT
             bne @no_display
