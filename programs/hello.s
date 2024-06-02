@@ -1,3 +1,8 @@
+;
+; Display "Hello, world!" on the LCD.
+;
+
+
 .setcpu   "65C02"
 .debuginfo
 .include "defines.s"

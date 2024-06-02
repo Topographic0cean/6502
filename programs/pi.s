@@ -1,3 +1,12 @@
+; 
+; Computes PI using pi/4 = arctan(1) as Taylor series.
+; This is not the most efficient computation, but it 
+; seems to slowly get there.
+; 
+; Also, make sure we have some blinking lights so we
+; look more professional.   Assumes that LEDs are attached
+; the the lower 5 bits of the 65C22 port A.
+;
 .setcpu   "65C02"
 .debuginfo
 .include "defines.s"
@@ -7,17 +16,20 @@ DECIMAL   = HEAP+12
 PSTARTLO = $2800        ; 4,000,000,000
 PSTARTHI = $EE6B        
 
-;LED     = $40 ; Make blinky lights
-PI      = $50 ; Each of thse vars are 4 bytes
-N       = $58
-TERM    = $60
-TDIV    = $70
-REM     = $78
-SUBSAVE = $80
+LED         = $40 ; Make blinky lights
+COUNT       = $41 ; Only display result every 256 computations
+PI          = $50 ; Each of thse vars are 4 bytes
+N           = $58
+TERM        = $60
+TDIV        = $70
+REM         = $78
+SUBSAVE     = $80
 
 .org START
+            lda #$FF
+            sta COUNT
             lda #$00
-            ;sta LED
+            sta LED
             sta N
             sta N+1
             sta N+2
@@ -31,10 +43,12 @@ SUBSAVE = $80
             lda #>PSTARTHI
             sta PI+3
 
-pi_loop:    ;lda LED           ; blink some lights
-            ;and #%00011111    ; top 3 bits are for LCD
-            ;jsr DISPLAY_PORT
-            ;inc LED
+pi_loop:    inc COUNT
+            bne @no_display
+            lda LED           ; blink some lights
+            and #%00011111    ; top 3 bits are for LCD
+            jsr DISPLAY_PORT
+            inc LED
             lda PI
             sta HEAP
             lda PI+1 
@@ -44,8 +58,8 @@ pi_loop:    ;lda LED           ; blink some lights
             lda PI+3 
             sta HEAP+3
             jsr display_num
-
-            ; increment N
+            
+@no_display: ; increment N
             inc N
             bne @n_done
             inc N + 1
