@@ -30,6 +30,16 @@ int buff_not_full() {
 
 uint16_t delay = 0;
 
+void push_char(uint8_t c) {
+    if (c == 0x7F) // Delete to backspace
+        c = 0x08;
+    if (c == 0x0A) // Carraige return to Line Feed
+        c = 0x0D;
+    input_buffer[write_buff] = c;
+    write_buff = (write_buff+1)%BUF_SIZE;
+    if (verbose) log("acia_read_keyboard %c (%d,%d)\n",c,read_buff,write_buff);
+}
+
 void acia_read_keyboard()
 {
     int c;
@@ -58,12 +68,8 @@ void acia_read_keyboard()
         case 0x18: // Control-X
             quit(0);
             break;
-        case 0x0A: // Line Feed
-            c = 0x0D;
         default:
-            input_buffer[write_buff] = c;
-            write_buff = (write_buff+1)%BUF_SIZE;
-            if (verbose) log("acia_read_keyboard %c (%d,%d)\n",c,read_buff,write_buff);
+            push_char(c);
         }
     }
     if (!delay && read_buff != write_buff)
