@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+sudo  minipro -p 28C256 -uP -w rom/rom.bin
+
