@@ -1,6 +1,9 @@
 ;  VIA chip controls the LCD display as well as the serial CTS and various LED blinkenlights
 ;
 ;  PORT B is attached the LCD
+;       bit  7   6   5   4   3   2   1   0
+;           ES  RS  RW  -   DB7 DB6 DB5 DB4 
+;        
 ;  PORT A is set as follows
 ;       bit 0       CTS
 ;       bits 1-7    LED blinkenlights
@@ -31,7 +34,7 @@ VIA_SETUP:
                 lda #$01
                 sta PORT
                 sta PORTA
-                lda #%00111000  ; 4-bit mode 2 line display 5x8 font
+                lda #%00110000  ; 4-bit mode 
                 jsr toggle_execute
                 lda #%00001110  ; display on; cursor on; blink off
                 jsr toggle_execute
@@ -52,16 +55,13 @@ DISPLAY_PUTC:   ; put the character in the accumulator to LCD
                 pha 
                 jsr wait_lcd
                 pla
-                sta PORTB       
-                lda #RS          ; set register select and toggle execute
-                ora PORT
-                sta PORTA
-                lda #(RS | E)
-                ora PORT
-                sta PORTA
-                lda #0
-                ora PORT
-                sta PORTA
+                ora #RS          ; set register select and toggle execute
+                and #(~E)
+                sta PORTB
+                ora #(RS | E)
+                sta PORTB
+                and #(!(RS|E))
+                sta PORTB
                 rts
 
                 ; Set CTS to the value of bit 0 in the accumulator
@@ -82,17 +82,14 @@ VIA_CTS:        pha
 wait_lcd:       lda #%0000000  ; all input
                 sta DDRB   
 display_busy:   lda #RW
-                ora PORT
-                sta PORTA
+                sta PORTB
                 lda #(RW | E)
-                ora PORT
-                sta PORTA
+                sta PORTB
                 lda PORTB
                 and #%10000000
                 bne display_busy
                 lda #RW
-                ora PORT
-                sta PORTA
+                sta PORTB
                 lda #%11111111  ; all output
                 sta DDRB        
                 rts
@@ -101,13 +98,10 @@ toggle_execute: pha
                 jsr wait_lcd
                 pla
                 sta PORTB       
-                lda #0
-                ora PORT
-                sta PORTA
-                lda #E
-                ora PORT
-                sta PORTA
-                lda #0
-                ora PORT
-                sta PORTA
+                and #(~E)
+                sta PORTB
+                ora #E
+                sta PORTB
+                and #(~E)
+                sta PORTB
                 rts
