@@ -23,9 +23,9 @@ ACIA_SETUP: lda #$00
             sta ACIA_CMD
             rts
 
-MONRDKEY:   phx
-            jsr BUF_SIZE
+MONRDKEY:   jsr BUF_SIZE
             beq @no_key
+            phx
             ldx READ_PTR
             lda INPUT_BUFFER, x
             inc READ_PTR
@@ -33,7 +33,7 @@ MONRDKEY:   phx
             jsr BUF_SIZE
             cmp #$B0
             bcs @FULLISH
-            lda #$00
+            lda #$01
             jsr VIA_CTS
 @FULLISH:   pla
             plx
@@ -67,7 +67,7 @@ WRITE_BUF:  ldx WRITE_PTR
             jsr BUF_SIZE
             cmp #$F0
             bcc @NOT_FULL
-            lda #$01
+            lda #$00
             jsr VIA_CTS
 @NOT_FULL:  plx
             pla

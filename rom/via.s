@@ -21,13 +21,16 @@ E  = %10000000
 RW = %01000000
 RS = %00100000
 
-VIA_SETUP:      ; initialize port a to 0
-                lda #$00
-                sta PORT
+VIA_SETUP: 
                 lda #%11111111  ; all output
                 sta DDRB        
                 lda #%11111111  ; all output
                 sta DDRA        
+
+                ; initialize port a to 1 (CTS set)
+                lda #$01
+                sta PORT
+                sta PORTA
                 lda #%00111000  ; 4-bit mode 2 line display 5x8 font
                 jsr toggle_execute
                 lda #%00001110  ; display on; cursor on; blink off
@@ -35,6 +38,7 @@ VIA_SETUP:      ; initialize port a to 0
                 lda #%00000110  ; inc and shift cursor; no display shift
                 jsr toggle_execute
                 rts
+
 
 DISPLAY_CLEAR:  lda #%00000001
                 jsr toggle_execute
@@ -61,10 +65,18 @@ DISPLAY_PUTC:   ; put the character in the accumulator to LCD
                 rts
 
                 ; Set CTS to the value of bit 0 in the accumulator
-VIA_CTS:        ora #%11111110 
-                and PORT
+VIA_CTS:        pha
+                bit #$01
+                bne @turn_on_cts
+                lda PORT
+                and #%11111110
+                jmp @cts_done
+@turn_on_cts:   lda PORT
+                ora #%00000001
+@cts_done:
                 sta PORT
                 sta PORTA
+                pla
                 rts
 
 wait_lcd:       lda #%0000000  ; all input
