@@ -33,8 +33,8 @@ MONRDKEY:   phx
             jsr BUF_SIZE
             cmp #$B0
             bcs @FULLISH
-            lda #$09
-            sta ACIA_CMD
+            lda #$00
+            jsr VIA_CTS
 @FULLISH:   pla
             plx
             sec
@@ -68,7 +68,7 @@ WRITE_BUF:  ldx WRITE_PTR
             cmp #$F0
             bcc @NOT_FULL
             lda #$01
-            sta ACIA_CMD
+            jsr VIA_CTS
 @NOT_FULL:  plx
             pla
             rti

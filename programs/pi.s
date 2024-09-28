@@ -48,7 +48,7 @@ pi_loop:    inc COUNT
             bne @no_display
             lda LED           ; blink some lights
             and #%00011111    ; top 3 bits are for LCD
-            jsr DISPLAY_PORT
+            ;jsr DISPLAY_PORT
             inc LED
             lda PI
             sta HEAP

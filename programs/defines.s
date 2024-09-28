@@ -21,7 +21,8 @@ MONRDKEY            = $A0C5     ; Check for keypress.
 DISPLAY_HOME        = $A120     ; Call to move LCD cursor to beginning
 DISPLAY_CLEAR       = $A11A     ; Call to clear the LCD
 DISPLAY_PUTC        = $A126     ; Call to add the character in accumlator to LCD
-DISPLAY_PORT        = $A144     ; Sets display port A to value in accumulator
 
-HEXTODEC            = $A18F      ; Call to convert 16 bit hexidecimal number stored in HEAP to  
+VIA_CTS             = $A15E     ; Sets serial CTS from accumulator
+
+HEXTODEC            = $A18F     ; Call to convert 16 bit hexidecimal number stored in HEAP to  
                                 ; decimal string.  String will start at HEAP+12 and be null terminated.

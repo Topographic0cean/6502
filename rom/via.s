@@ -1,7 +1,15 @@
+;  VIA chip controls the LCD display as well as the serial CTS and various LED blinkenlights
+;
+;  PORT B is attached the LCD
+;  PORT A is set as follows
+;       bit 0       CTS
+;       bits 1-7    LED blinkenlights
+;
 
 .segment    "ROM"
 
-PORT    = $02       ; keep track of what PORTA should be
+PORT    = $02       ; keep track of what PORTA should be.  Since it is used by different
+                    ; functions.  We do not expect them to know what each is doing.
 
 LCD     = $6000
 PORTB   = LCD
@@ -13,15 +21,14 @@ E  = %10000000
 RW = %01000000
 RS = %00100000
 
-DISPLAY_SETUP:  ; initial port a to 0
+VIA_SETUP:      ; initialize port a to 0
                 lda #$00
                 sta PORT
-                ; setup the display to 8 bits 2 lines
                 lda #%11111111  ; all output
                 sta DDRB        
                 lda #%11111111  ; all output
                 sta DDRA        
-                lda #%00111000  ; 8-bit mode 2 line display 5x8 font
+                lda #%00111000  ; 4-bit mode 2 line display 5x8 font
                 jsr toggle_execute
                 lda #%00001110  ; display on; cursor on; blink off
                 jsr toggle_execute
@@ -53,7 +60,10 @@ DISPLAY_PUTC:   ; put the character in the accumulator to LCD
                 sta PORTA
                 rts
 
-DISPLAY_PORT:   sta PORT
+                ; Set CTS to the value of bit 0 in the accumulator
+VIA_CTS:        ora #%11111110 
+                and PORT
+                sta PORT
                 sta PORTA
                 rts
 

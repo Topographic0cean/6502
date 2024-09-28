@@ -16,7 +16,7 @@ HEAP       = $0400
 
 RESET:      cld
             jsr ACIA_SETUP
-            jsr DISPLAY_SETUP
+            jsr VIA_SETUP
             lda #$1b
             cli 
 
@@ -166,6 +166,6 @@ SAVE:
 LOAD:       rts
 
 .include "acia.s"
-.include "display.s"
+.include "via.s"
 .include "hextodec.s"
 .include "vectors.s"
