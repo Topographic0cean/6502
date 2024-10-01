@@ -18,11 +18,11 @@ START               = $2000     ; Good place to put the RAM program
 
 MONRDKEY            = $A0C5     ; Check for keypress.
 
-DISPLAY_HOME        = $A120     ; Call to move LCD cursor to beginning
-DISPLAY_CLEAR       = $A11A     ; Call to clear the LCD
-DISPLAY_PUTC        = $A126     ; Call to add the character in accumlator to LCD
+DISPLAY_CLEAR       = $A13F     ; Call to clear the LCD
+DISPLAY_HOME        = $A145     ; Call to move LCD cursor to beginning
+DISPLAY_PUTC        = $A148     ; Call to add the character in accumlator to LCD
 
-VIA_CTS             = $A15E     ; Sets serial CTS from accumulator
+VIA_CTS             = $A175     ; Sets serial CTS from accumulator
 
-HEXTODEC            = $A18F     ; Call to convert 16 bit hexidecimal number stored in HEAP to  
+HEXTODEC            = $A1CF     ; Call to convert 16 bit hexidecimal number stored in HEAP to  
                                 ; decimal string.  String will start at HEAP+12 and be null terminated.

@@ -24,6 +24,8 @@ E  = %10000000
 RW = %01000000
 RS = %00100000
 
+ready: .byte "READY", $00
+
 VIA_SETUP: 
                 lda #%11111111  ; all output
                 sta DDRB        
@@ -34,15 +36,29 @@ VIA_SETUP:
                 lda #$01
                 sta PORT
                 sta PORTA
+
+                ; Initialize LCD to 4 bit 2 line mode
                 lda #%00000010  ; 4-bit mode 
-                jsr toggle_execute
+                sta PORTB
+                ora #E 
+                sta PORTB
+                and #%00001111
+                sta PORTB 
                 lda #%00101000 ; Set 4-bit mode; 2-line display; 5x8 font
                 jsr lcd_send
                 lda #%00001110  ; display on; cursor on; blink off
                 jsr lcd_send
                 lda #%00000110  ; inc and shift cursor; no display shift
                 jsr lcd_send
+
+                ; Display READY
                 jsr DISPLAY_CLEAR
+                ldy #00
+start_message:  lda ready, y
+                beq end_message
+                jsr DISPLAY_PUTC
+                iny
+                jmp start_message
                 rts
 
 
@@ -95,19 +111,25 @@ VIA_CTS:        pha
                 rts
 
 wait_lcd:       pha 
-                lda #%0000000  ; all input
+                lda #%11110000 ; data input
                 sta DDRB   
 display_busy:   lda #RW
                 sta PORTB
                 lda #(RW | E)
                 sta PORTB
                 lda PORTB
-                and #%10000000
+                pha
+                lda #RW
+                sta PORTB
+                lda #(RW | E)
+                sta PORTB
+                lda PORTB
+                pla
+                and #%00001000
                 bne display_busy
                 lda #RW
                 sta PORTB
                 lda #%11111111  ; all output
-                sta DDRB        
                 pla
                 rts
 
