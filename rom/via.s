@@ -54,11 +54,12 @@ VIA_SETUP:
                 ; Display READY
                 jsr DISPLAY_CLEAR
                 ldy #00
-start_message:  lda ready, y
-                beq end_message
+@start_message: lda ready, y
+                beq @end_message
                 jsr DISPLAY_PUTC
                 iny
-                jmp start_message
+                jmp @start_message
+@end_message
                 rts
 
 
@@ -73,7 +74,7 @@ DISPLAY_HOME:
                 rts
 
 DISPLAY_PUTC:   ; put the character in the accumulator to LCD
-                jsr wait_lcd
+                jsr lcd_wait
                 pha
                 lsr
                 lsr
@@ -110,10 +111,10 @@ VIA_CTS:        pha
                 pla
                 rts
 
-wait_lcd:       pha 
+lcd_wait:       pha 
                 lda #%11110000 ; data input
                 sta DDRB   
-display_busy:   lda #RW
+lcd_busy:       lda #RW
                 sta PORTB
                 lda #(RW | E)
                 sta PORTB
@@ -126,15 +127,16 @@ display_busy:   lda #RW
                 lda PORTB
                 pla
                 and #%00001000
-                bne display_busy
+                bne lcd_busy
                 lda #RW
                 sta PORTB
                 lda #%11111111  ; all output
+                sta DDRB   
                 pla
                 rts
 
 lcd_send:   
-                jsr wait_lcd
+                jsr lcd_wait
                 pha
                 lsr
                 lsr
