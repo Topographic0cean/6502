@@ -59,7 +59,7 @@ VIA_SETUP:
                 jsr DISPLAY_PUTC
                 iny
                 jmp @start_message
-@end_message
+@end_message:
                 rts
 
 
