@@ -2,7 +2,7 @@
 ;
 ;  PORT B is attached the LCD
 ;       bit  7   6   5   4   3   2   1   0
-;           ES  RS  RW  -   DB7 DB6 DB5 DB4 
+;           E   Rw  RS  -   DB7 DB6 DB5 DB4 
 ;        
 ;  PORT A is set as follows
 ;       bit 0       CTS
@@ -34,33 +34,48 @@ VIA_SETUP:
                 lda #$01
                 sta PORT
                 sta PORTA
-                lda #%00110000  ; 4-bit mode 
+                lda #%00000010  ; 4-bit mode 
                 jsr toggle_execute
+                lda #%00101000 ; Set 4-bit mode; 2-line display; 5x8 font
+                jsr lcd_send
                 lda #%00001110  ; display on; cursor on; blink off
-                jsr toggle_execute
+                jsr lcd_send
                 lda #%00000110  ; inc and shift cursor; no display shift
-                jsr toggle_execute
+                jsr lcd_send
+                jsr DISPLAY_CLEAR
                 rts
 
 
-DISPLAY_CLEAR:  lda #%00000001
-                jsr toggle_execute
+DISPLAY_CLEAR:  
+                lda #%00000001
+                jsr lcd_send
                 rts
 
-DISPLAY_HOME:   lda #%00000010
-                jsr toggle_execute
+DISPLAY_HOME:   
+                lda #%00000010
+                jsr lcd_send
                 rts
 
 DISPLAY_PUTC:   ; put the character in the accumulator to LCD
-                pha 
                 jsr wait_lcd
+                pha
+                lsr
+                lsr
+                lsr
+                lsr
+                ora #RS
+                sta PORTB
+                ora #E
+                sta PORTB
+                eor #E
+                sta PORTB
                 pla
-                ora #RS          ; set register select and toggle execute
-                and #(~E)
+                and #%00001111
+                ora #RS
                 sta PORTB
-                ora #(RS | E)
+                ora #E
                 sta PORTB
-                and #(!(RS|E))
+                eor #E
                 sta PORTB
                 rts
 
@@ -79,7 +94,8 @@ VIA_CTS:        pha
                 pla
                 rts
 
-wait_lcd:       lda #%0000000  ; all input
+wait_lcd:       pha 
+                lda #%0000000  ; all input
                 sta DDRB   
 display_busy:   lda #RW
                 sta PORTB
@@ -92,16 +108,26 @@ display_busy:   lda #RW
                 sta PORTB
                 lda #%11111111  ; all output
                 sta DDRB        
+                pla
                 rts
 
-toggle_execute: pha
+lcd_send:   
                 jsr wait_lcd
+                pha
+                lsr
+                lsr
+                lsr
+                lsr
+                jsr toggle_execute
                 pla
+                and #%00001111
+                jsr toggle_execute
+                rts
+
+toggle_execute: 
                 sta PORTB       
-                and #(~E)
-                sta PORTB
                 ora #E
                 sta PORTB
-                and #(~E)
+                eor #E
                 sta PORTB
                 rts
