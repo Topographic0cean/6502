@@ -18,6 +18,7 @@ IER       = $600E
             sta COUNT+1
             sta COUNT+2
             sta COUNT+3
+            jsr DISPLAY_CLEAR
 
 clock_loop: jsr MONRDKEY
             bcc @no_key
