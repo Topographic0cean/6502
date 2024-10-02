@@ -78,7 +78,8 @@
 		keyword_rts "PRT", PRT
 .endif
 .ifdef EATER
-		keyword_rts "DISPRINT", PRINTD
+		keyword_rts "DISCHAR", DISCHAR
+		keyword_rts "DISPRINT", DISPRINT
 		keyword_rts "DISCLEAR", DISPLAY_CLEAR
 		keyword_rts "DISHOME", DISPLAY_HOME
 .endif
