@@ -77,6 +77,11 @@
 .ifdef KBD
 		keyword_rts "PRT", PRT
 .endif
+.ifdef EATER
+		keyword_rts "DISPRINT", PRINTD
+		keyword_rts "DISCLEAR", DISPLAY_CLEAR
+		keyword_rts "DISHOME", DISPLAY_HOME
+.endif
 		keyword_rts "NEW", NEW
 
 		count_tokens
@@ -153,11 +158,6 @@ UNFNC_ATN:
 		keyword_addr "MID$", MIDSTR
 .ifdef CONFIG_2
 		keyword	"GO", TOKEN_GO
-.endif
-.ifdef EATER
-		keyword_rts "PRINTD", PRINTD
-		keyword_rts "CLEARD", DISPLAY_CLEAR
-		keyword_rts "HOMED", DISPLAY_HOME
 .endif
         .segment "KEYWORDS"
 		.byte   0
