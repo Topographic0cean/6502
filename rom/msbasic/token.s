@@ -154,6 +154,11 @@ UNFNC_ATN:
 .ifdef CONFIG_2
 		keyword	"GO", TOKEN_GO
 .endif
+.ifdef EATER
+		keyword_rts "PRINTD", PRINTD
+		keyword_rts "CLEARD", DISPLAY_CLEAR
+		keyword_rts "HOMED", DISPLAY_HOME
+.endif
         .segment "KEYWORDS"
 		.byte   0
 

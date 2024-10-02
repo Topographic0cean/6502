@@ -95,6 +95,11 @@ DISPLAY_PUTC:   ; put the character in the accumulator to LCD
                 eor #E
                 sta PORTB
                 rts
+PRINTD:         
+                jsr GETBYT
+                txa
+                jsr DISPLAY_PUTC
+                rts
 
                 ; Set CTS to the value of bit 0 in the accumulator
 VIA_CTS:        pha
