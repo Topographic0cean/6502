@@ -1,9 +1,11 @@
 ; 
-; Computes PI using pi = 3 + 4/(2*3*4) - 4/(4*5*6) ...
+; Computes PI using pi/4 = arctan(1) as Taylor series.
+; This is not the most efficient computation, but it 
+; seems to slowly get there.
 ; 
 ; Also, make sure we have some blinking lights so we
 ; look more professional.   Assumes that LEDs are attached
-; the the lower 7 bits of the 65C22 port A.
+; the the lower 5 bits of the 65C22 port A.
 ;
 .setcpu   "65C02"
 .debuginfo
@@ -45,7 +47,7 @@ SUBSAVE     = $80
 pi_loop:    inc COUNT
             bne @no_display
             lda LED           ; blink some lights
-            and #%00011111    ; top 3 bits are for control
+            and #%00011111    ; top 3 bits are for LCD
             ;jsr DISPLAY_PORT
             inc LED
             lda PI
