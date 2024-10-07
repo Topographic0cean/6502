@@ -16,13 +16,16 @@
 static uint8_t data = 0;
 static uint8_t status = 0;
 
+uint8_t poweron = 1;
+
 uint8_t display = 0;
 uint8_t cursor = 0;
 uint8_t blink = 0;
 uint8_t shift_cursor = 0;
 uint8_t shift_display = 0;
 
-uint8_t bits;
+uint8_t bits = 8;
+uint8_t hi = 1;
 
 #define FONT5_10 1
 #define FONT5_8 2
@@ -41,7 +44,7 @@ int verbose = 0;
 void display_clear()
 {
     if (verbose)
-        log("display clear\n");
+        log("display: clear\n");
    window_lcd_clear();
 }
 
@@ -53,19 +56,19 @@ void display_write_char()
 void display_read_instruction()
 {
     if (verbose)
-        log("display read instruction %x\n", status);
+        log("display: read instruction %x\n", status);
     data = 0;
 }
 void display_set_ddram_address()
 {
     if (verbose)
-        log("set ddram address\n");
+        log("display: set ddram address\n");
     
 }
 void display_set_cgram_address()
 {
    if (verbose)
-        log("set cgram address\n");
+        log("display: set cgram address\n");
 }
 void display_function_set()
 {
@@ -82,13 +85,13 @@ void display_function_set()
     else
         font = FONT5_8;
     if (verbose)
-        log("display function set bits=%d lines=%d font=%s\n", bits, lines, (font == FONT5_10) ? "5x10" : "5x8");
+        log("display: function set bits=%d lines=%d font=%s\n", bits, lines, (font == FONT5_10) ? "5x10" : "5x8");
 }
 
 void display_shift()
 {
     if (verbose)
-        log("display shift\n");
+        log("display: shift\n");
 }
 
 void display_display_ctl()
@@ -97,7 +100,7 @@ void display_display_ctl()
     cursor = data & 0x02;
     blink = data & 0x01;
     if (verbose)
-        log("display display ctl display %s cursor %s blink %s\n", data & 0x04 ? "on" : "off", data & 0x02 ? "on" : "off", data & 0x01 ? "on" : "off");
+        log("display: ctl display %s cursor %s blink %s\n", data & 0x04 ? "on" : "off", data & 0x02 ? "on" : "off", data & 0x01 ? "on" : "off");
 }
 
 void display_mode_set()
@@ -106,7 +109,7 @@ void display_mode_set()
     shift_display = data & 0x01;
 
     if (verbose)
-        log("display mode set %s %s\n", (shift_cursor) ? "cursor shift" : "cursor move", (shift_display) ? "display shift" : "display move");
+        log("display: mode set %s %s\n", (shift_cursor) ? "cursor shift" : "cursor move", (shift_display) ? "display shift" : "display move");
 }
 
 void display_return_home()
@@ -119,8 +122,15 @@ void display_return_home()
 void display_write_instruction()
 {
     if (verbose)
-        log("display write instruction %d\n", data);
-    if (data & 0x80)
+        log("display: write instruction %d\n", data);
+    if (poweron) {
+        if (data == 0x02) {
+            log("display: poweron set 4 bits\n");
+            bits = 4;
+        }
+        poweron = 0;
+    }
+    else if (data & 0x80)
         display_set_ddram_address();
     else if (data & 0x40)
         display_set_cgram_address();
@@ -138,15 +148,15 @@ void display_write_instruction()
         display_clear();
     else
         if (verbose)
-        log("display no op %d\n", data);
+        log("display: no op %d\n", data);
 }
 
 void display_set_status(uint8_t s)
 {
     if (verbose)
-        log("display set status from %u to %u\n",status,s);
-    // transition from E=0 to E=1 triggers the read or write
-    if (!(status & DISPLAY_E) && (s & DISPLAY_E))
+        log("display: set status from %x to %x\n",status,s);
+    // transition from E=1 to E=0 triggers the read or write
+    if ((status & DISPLAY_E) && !(s & DISPLAY_E))
     {
         if (s & DISPLAY_RW)
         {
@@ -171,12 +181,27 @@ void display_set_status(uint8_t s)
 
 void display_write_data(uint8_t d)
 {
-    data = d;
+    log("display: write data %x\n",d);
+    if (bits == 8) {
+        data = d;
+        display_set_status(data);
+    }
+    else {
+        if (hi) {
+            data = d & 0xf0;
+            hi = 0;
+        }
+        else {
+            data = data | ((d  & 0xf0)>>4);
+            hi = 1;
+            display_set_status(data);
+        }
+    }
 }
 
 uint8_t display_read_data()
 {
-    return data;
+    return data & 0x0f;
 }
 
 void display_init(int io_log)

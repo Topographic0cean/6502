@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 
-#define DISPLAY_E 0x04      // transition from 0 to 1 to trigger action
-#define DISPLAY_RW 0x02     // 0 = write, 1 = read
-#define DISPLAY_RS 0x01     // 0 = instruction, 1 = data
+#define DISPLAY_E  0x80     // transition from 0 to 1 to trigger action
+#define DISPLAY_RW 0x40     // 0 = write, 1 = read
+#define DISPLAY_RS 0x20     // 0 = instruction, 1 = data
 
 void display_init(int io_log);
 void display_set_status(uint8_t status);
