@@ -13,13 +13,10 @@
     IRQ     -> IRQ of 6502
     RW      -> RW of 6502
     D0-D7   -> Data Bus
-    PA5     -> E  Display
-    PA6     -> RW Display
-    PA7     -> RS Display
-    PB0-PB7 -> DB0-DB7 of Dislay
-
-
-
+    PB7     -> E  Display
+    PB6     -> RW Display
+    PB5     -> RS Display
+    PB0-PB4 -> DB4-DB7 of Dislay
 */
 
 static uint8_t data = 0;
@@ -58,8 +55,8 @@ void io_register_a(uint8_t value)
     if (verbose)
         log("io_register_a %x (%x)\n", value, ddra);
     data = value & ddra;
-    if (ddra > 0)
-        display_set_status((data & 0xE0) >> 5);
+    //if (ddra > 0)
+    //     display_set_status((data & 0xE0) >> 5);
 }
 
 void start_timer1()

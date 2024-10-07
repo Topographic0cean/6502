@@ -8,6 +8,10 @@
 #include "window.h"
 #include "logger.h"
 
+/*
+
+*/
+
 
 static uint8_t data = 0;
 static uint8_t status = 0;
@@ -33,15 +37,6 @@ uint8_t pos = 0;
 
 int verbose = 0;
 
-void display_write_data(uint8_t d)
-{
-    data = d;
-}
-
-uint8_t display_read_data()
-{
-    return data;
-}
 
 void display_clear()
 {
@@ -169,6 +164,19 @@ void display_set_status(uint8_t s)
         }
     }
     status = s;
+}
+
+
+/* Theses are the main entry points and all actions are trigger off of these. */
+
+void display_write_data(uint8_t d)
+{
+    data = d;
+}
+
+uint8_t display_read_data()
+{
+    return data;
 }
 
 void display_init(int io_log)
