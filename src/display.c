@@ -12,11 +12,11 @@
 
 */
 
-
 static uint8_t data = 0;
 static uint8_t status = 0;
 
 uint8_t poweron = 1;
+uint8_t executing = 0;
 
 uint8_t display = 0;
 uint8_t cursor = 0;
@@ -40,17 +40,17 @@ uint8_t pos = 0;
 
 int verbose = 0;
 
-
 void display_clear()
 {
     if (verbose)
         log("display: clear\n");
-   window_lcd_clear();
+    window_lcd_clear();
 }
 
 void display_write_char()
 {
-   window_lcd_putc(data);
+    log("display: write char %x\n", data);
+    window_lcd_putc(data);
 }
 
 void display_read_instruction()
@@ -63,11 +63,10 @@ void display_set_ddram_address()
 {
     if (verbose)
         log("display: set ddram address\n");
-    
 }
 void display_set_cgram_address()
 {
-   if (verbose)
+    if (verbose)
         log("display: set cgram address\n");
 }
 void display_function_set()
@@ -122,9 +121,11 @@ void display_return_home()
 void display_write_instruction()
 {
     if (verbose)
-        log("display: write instruction %d\n", data);
-    if (poweron) {
-        if (data == 0x02) {
+        log("display: write instruction %x\n", data);
+    if (poweron)
+    {
+        if (data == 0x82)
+        {
             log("display: poweron set 4 bits\n");
             bits = 4;
         }
@@ -146,57 +147,76 @@ void display_write_instruction()
         display_return_home();
     else if (data & 0x01)
         display_clear();
-    else
-        if (verbose)
+    else if (verbose)
         log("display: no op %d\n", data);
 }
 
 void display_set_status(uint8_t s)
 {
     if (verbose)
-        log("display: set status from %x to %x\n",status,s);
-    // transition from E=1 to E=0 triggers the read or write
-    if ((status & DISPLAY_E) && !(s & DISPLAY_E))
+        log("display: set status from %x to %x\n", status, s);
+    // transition from E=0 to E=1 triggers execution
+    if (!(status & DISPLAY_E) && (s & DISPLAY_E))
     {
-        if (s & DISPLAY_RW)
+        executing = 1;
+    }
+    else
+    {
+        executing = 0;
+    }
+    status = s;
+}
+
+void display_write_four_bits(uint8_t d)
+{
+    log("display: write four bit %x\n", d);
+    if (hi)
+    {
+        data = d & 0x0f;
+        hi = 0;
+    }
+    else
+    {
+        data = (data << 4) | (d & 0x0f);
+        hi = 1;
+        if (d & DISPLAY_RS)
+            display_write_char();
+        else
+            display_write_instruction();
+    }
+}
+
+/* Theses are the main entry points and all actions are trigger off of these. */
+
+void display_write_data(uint8_t d)
+{
+    display_set_status(d);
+    if (executing)
+    {
+        log("display: write data executing %x\n", d);
+        if (d & DISPLAY_RW)
         {
-            if (s & DISPLAY_RS)
+            if (d & DISPLAY_RS)
                 display_read_data();
             else
                 display_read_instruction();
         }
         else
         {
-            if (s & DISPLAY_RS)
-                display_write_char();
+            if (bits == 8)
+            {
+                data = d;
+                if (d & DISPLAY_RS)
+                    display_write_char();
+                else
+                    display_write_instruction();
+            }
             else
-                display_write_instruction();
+                display_write_four_bits(d);
         }
     }
-    status = s;
-}
-
-
-/* Theses are the main entry points and all actions are trigger off of these. */
-
-void display_write_data(uint8_t d)
-{
-    log("display: write data %x\n",d);
-    if (bits == 8) {
-        data = d;
-        display_set_status(data);
-    }
-    else {
-        if (hi) {
-            data = d & 0xf0;
-            hi = 0;
-        }
-        else {
-            data = data | ((d  & 0xf0)>>4);
-            hi = 1;
-            display_set_status(data);
-        }
-    }
+    else
+        log("display: write data not executing %x\n", d);
 }
 
 uint8_t display_read_data()
