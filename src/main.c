@@ -53,7 +53,8 @@ int main(int argc, const char *argv[])
     {
         if (controls->reset == 1)
         {
-            //reset6502();
+            logger_log(LOGGER_IO,"===== reset ===== \n");
+            reset6502();
             controls->reset = 0;
         }
         if (controls->nmi == 1)

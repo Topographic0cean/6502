@@ -63,13 +63,14 @@ pi_loop:    inc COUNT
             ;sta HEAP+3
             ;jsr display_num
 
-            lda #$00
+            lda #$04
+            ldx #$03
+            jsr mult
             sta HEAP
+            lda #$00
             sta HEAP+1
             sta HEAP+2
             sta HEAP+3
-            ;ldx #$02
-            ;jsr mult_add
             jsr display_num
 
 stop:
