@@ -38,36 +38,30 @@ uint8_t lines = MAX_LINES;
 uint8_t line = 0;
 uint8_t pos = 0;
 
-int verbose = 0;
-
 void display_clear()
 {
-    if (verbose)
-        log("display: clear\n");
+    logger_log(LOGGER_IO,"display: clear\n");
     window_lcd_clear();
 }
 
 void display_write_char()
 {
-    log("display: write char %x\n", data);
+    logger_log(LOGGER_IO,"display: write char %x\n", data);
     window_lcd_putc(data);
 }
 
 void display_read_instruction()
 {
-    if (verbose)
-        log("display: read instruction %x\n", status);
+    logger_log(LOGGER_IO,"display: read instruction %x\n", status);
     data = 0;
 }
 void display_set_ddram_address()
 {
-    if (verbose)
-        log("display: set ddram address\n");
+    logger_log(LOGGER_IO,"display: set ddram address\n");
 }
 void display_set_cgram_address()
 {
-    if (verbose)
-        log("display: set cgram address\n");
+    logger_log(LOGGER_IO,"display: set cgram address\n");
 }
 void display_function_set()
 {
@@ -83,14 +77,12 @@ void display_function_set()
         font = FONT5_10;
     else
         font = FONT5_8;
-    if (verbose)
-        log("display: function set bits=%d lines=%d font=%s\n", bits, lines, (font == FONT5_10) ? "5x10" : "5x8");
+    logger_log(LOGGER_IO,"display: function set bits=%d lines=%d font=%s\n", bits, lines, (font == FONT5_10) ? "5x10" : "5x8");
 }
 
 void display_shift()
 {
-    if (verbose)
-        log("display: shift\n");
+    logger_log(LOGGER_IO,"display: shift\n");
 }
 
 void display_display_ctl()
@@ -98,8 +90,7 @@ void display_display_ctl()
     display = data & 0x04;
     cursor = data & 0x02;
     blink = data & 0x01;
-    if (verbose)
-        log("display: ctl display %s cursor %s blink %s\n", data & 0x04 ? "on" : "off", data & 0x02 ? "on" : "off", data & 0x01 ? "on" : "off");
+    logger_log(LOGGER_IO,"display: ctl display %s cursor %s blink %s\n", data & 0x04 ? "on" : "off", data & 0x02 ? "on" : "off", data & 0x01 ? "on" : "off");
 }
 
 void display_mode_set()
@@ -107,8 +98,7 @@ void display_mode_set()
     shift_cursor = data & 0x02;
     shift_display = data & 0x01;
 
-    if (verbose)
-        log("display: mode set %s %s\n", (shift_cursor) ? "cursor shift" : "cursor move", (shift_display) ? "display shift" : "display move");
+    logger_log(LOGGER_IO,"display: mode set %s %s\n", (shift_cursor) ? "cursor shift" : "cursor move", (shift_display) ? "display shift" : "display move");
 }
 
 void display_return_home()
@@ -120,13 +110,12 @@ void display_return_home()
 
 void display_write_instruction()
 {
-    if (verbose)
-        log("display: write instruction %x\n", data);
+    logger_log(LOGGER_IO,"display: write instruction %x\n", data);
     if (poweron)
     {
         if (data == 0x82)
         {
-            log("display: poweron set 4 bits\n");
+            logger_log(LOGGER_IO,"display: poweron set 4 bits\n");
             bits = 4;
         }
         poweron = 0;
@@ -147,14 +136,13 @@ void display_write_instruction()
         display_return_home();
     else if (data & 0x01)
         display_clear();
-    else if (verbose)
-        log("display: no op %d\n", data);
+    else
+        logger_log(LOGGER_IO,"display: no op %d\n", data);
 }
 
 void display_set_status(uint8_t s)
 {
-    if (verbose)
-        log("display: set status from %x to %x\n", status, s);
+    logger_log(LOGGER_IO,"display: set status from %x to %x\n", status, s);
     // transition from E=0 to E=1 triggers execution
     if (!(status & DISPLAY_E) && (s & DISPLAY_E))
     {
@@ -169,7 +157,7 @@ void display_set_status(uint8_t s)
 
 void display_write_four_bits(uint8_t d)
 {
-    log("display: write four bit %x\n", d);
+    logger_log(LOGGER_IO,"display: write four bit %x\n", d);
     if (hi)
     {
         data = d & 0x0f;
@@ -193,7 +181,7 @@ void display_write_data(uint8_t d)
     display_set_status(d);
     if (executing)
     {
-        log("display: write data executing %x\n", d);
+        logger_log(LOGGER_IO,"display: write data executing %x\n", d);
         if (d & DISPLAY_RW)
         {
             if (d & DISPLAY_RS)
@@ -216,7 +204,7 @@ void display_write_data(uint8_t d)
         }
     }
     else
-        log("display: write data not executing %x\n", d);
+        logger_log(LOGGER_IO,"display: write data not executing %x\n", d);
 }
 
 uint8_t display_read_data()
@@ -224,8 +212,7 @@ uint8_t display_read_data()
     return data & 0x0f;
 }
 
-void display_init(int io_log)
+void display_init()
 {
-    verbose = io_log;
     display_clear();
 }

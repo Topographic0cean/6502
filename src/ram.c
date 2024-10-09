@@ -8,7 +8,6 @@
 #include "window.h"
 
 static char RAM[ROM_END + 1];
-static int verbose = 0;
 
 static char status[128];
 
@@ -80,7 +79,6 @@ void load_program(char *filename)
 void ram_init(Options *options)
 {
     memset(RAM, 0, sizeof(RAM));
-    verbose = options->instructions;
 
     // read the binary file into high 32K of RAM
     FILE *file = fopen(options->rom, "rb");

@@ -20,6 +20,10 @@ void quit(int signum)
     control.done = 1;
 }
 
+void cpu_reset()
+{
+    control.reset = 1;
+}
 void cpu_pause()
 {
     control.pause = 1;
@@ -50,6 +54,7 @@ Control* control_init(Options* options) {
     control.irq = 0;
     control.nmi = 0;
     control.pause = options->paused;
+    control.reset = 0;
     control.done = 0;
     control.step = 0;
     return &control;

@@ -28,35 +28,29 @@ static uint8_t ier = 0;
 static uint16_t timer1 = 0;
 static uint8_t timer1_running = 0;
 
-static int verbose = 0;
-
-void w65c22_init(int v)
+void w65c22_init()
 {
-    verbose = v;
 }
 
 void set_t1_low(uint8_t value)
 {
     timer1 = (value << 8) | (timer1 & 0xFF);
-    if (verbose)
-        log("set t1 low %x\n", timer1);
+    logger_log(LOGGER_IO,"set t1 low %x\n", timer1);
 }
 
 void set_t1_high(uint8_t value)
 {
     timer1 = (value) | (timer1 & 0xFF00);
-    if (verbose)
-        log("set t1 high %x\n", timer1);
+    logger_log(LOGGER_IO,"set t1 high %x\n", timer1);
 }
 
 void io_register_a(uint8_t value)
 {
     // a is wired to the control pins
-    if (verbose)
-        log("io_register_a %x (%x)\n", value, ddra);
+    logger_log(LOGGER_IO,"io_register_a %x (%x)\n", value, ddra);
     data = value & ddra;
-    //if (ddra > 0)
-    //     display_set_status((data & 0xE0) >> 5);
+    // if (ddra > 0)
+    //      display_set_status((data & 0xE0) >> 5);
 }
 
 void start_timer1()
@@ -79,8 +73,7 @@ void w65c22_tick()
 void io_register_b(uint8_t value)
 {
     // b is wired to the display
-    if (verbose)
-        log("io_register_b %x (%x)\n", value, ddrb);
+    logger_log(LOGGER_IO,"io_register_b %x (%x)\n", value, ddrb);
 
     data = value & ddrb;
     if (ddrb > 0)
@@ -91,55 +84,47 @@ void io_register_b(uint8_t value)
 
 void data_direction_a(uint8_t value)
 {
-    if (verbose)
-        log("data_direction_a %x\n", value);
+    logger_log(LOGGER_IO,"data_direction_a %x\n", value);
     ddra = value;
 }
 
 void data_direction_b(uint8_t value)
 {
-    if (verbose)
-        log("data_direction_b %x\n", value);
+    logger_log(LOGGER_IO,"data_direction_b %x\n", value);
     ddrb = value;
 }
 
 void t1_low(uint8_t value)
 {
-    if (verbose)
-        log("t1 low %x\n", value);
+    logger_log(LOGGER_IO,"t1 low %x\n", value);
     set_t1_low(value);
 }
 
 void t1_high(uint8_t value)
 {
-    if (verbose)
-        log("t1 high %x\n", value);
+    logger_log(LOGGER_IO,"t1 high %x\n", value);
     set_t1_high(value);
     start_timer1();
 }
 
 void acr_write(uint8_t value)
 {
-    if (verbose)
-        log("acr_write %x\n", value);
+    logger_log(LOGGER_IO,"acr_write %x\n", value);
 }
 
 void ifr_write(uint8_t value)
 {
-    if (verbose)
-        log("ifr_write %x\n", value);
+    logger_log(LOGGER_IO,"ifr_write %x\n", value);
 }
 
 void ier_write(uint8_t value)
 {
-    if (verbose)
-        log("ier_write %x\n", value);
+    logger_log(LOGGER_IO,"ier_write %x\n", value);
 }
 
 void w65c22_write(uint8_t address, uint8_t value)
 {
-    if (verbose)
-        log("w65c22_write: %x %x\n", address, value);
+    logger_log(LOGGER_IO,"w65c22_write: %x %x\n", address, value);
     switch (address)
     {
     case 0:
@@ -182,8 +167,7 @@ void w65c22_write(uint8_t address, uint8_t value)
 
 uint8_t w65c22_read(uint8_t address)
 {
-    if (verbose)
-        log("w65c22_read: %x %x\n", address, data);
+    logger_log(LOGGER_IO,"w65c22_read: %x %x\n", address, data);
     switch (address)
     {
     case 0:

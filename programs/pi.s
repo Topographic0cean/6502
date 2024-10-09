@@ -28,6 +28,7 @@ ADDSUB      = $58 ; zero if we add, otherwise subtract
 TERM        = $60 ; will hold term we add or subtract to PI
 DIVISOR     = $70
 REM         = $78
+MULT        = $82
 
 .org START
             lda #$FF
@@ -52,27 +53,56 @@ pi_loop:    inc COUNT
             ;jsr DISPLAY_PORT
             inc LED
 @no_led:
-            lda PI
-            sta HEAP
-            lda PI+1 
-            sta HEAP+1
-            lda PI+2
-            sta HEAP+2
-            lda PI+3 
-            sta HEAP+3
-            jsr display_num
-            
-            jmp pi_loop
+            ;lda PI
+            ;sta HEAP
+            ;lda PI+1 
+            ;sta HEAP+1
+            ;lda PI+2
+            ;sta HEAP+2
+            ;lda PI+3 
+            ;sta HEAP+3
+            ;jsr display_num
 
-      display_num:
+            lda #$00
+            sta HEAP
+            sta HEAP+1
+            sta HEAP+2
+            sta HEAP+3
+            ;ldx #$02
+            ;jsr mult_add
+            jsr display_num
+
+stop:
+            ;jmp pi_loop
+            jmp stop
+
+mult:       ; A - multiplicand
+            ; X - multiplier
+            sta MULT
+mult_add:
+            dex
+            beq mult_done
+            adc MULT
+            jmp mult_add
+mult_done:
+            rts
+
+
+            
+
+
+
+
+
+display_num:
             jsr DISPLAY_HOME
             jsr HEXTODEC
             ldy #$00
-      @output:
+@output:
             lda DECIMAL, y
             beq @done
             jsr DISPLAY_PUTC
             iny
             jmp @output
-      @done:
+@done:
             rts

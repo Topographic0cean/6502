@@ -2,8 +2,10 @@
 
 #include <stdio.h>
 
-extern FILE* logfile;
-void logger_init(int log);
-void logger_close();
+#define LOGGER_IO   1
+#define LOGGER_CODE 2
 
-#define log(...) fprintf(logfile, __VA_ARGS__)
+extern FILE* logfile;
+extern void logger_init(int log);
+extern void logger_log(int level, char* fmt, ...);
+extern void logger_close();

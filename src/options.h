@@ -7,8 +7,7 @@ typedef struct options
     char *load;
     int clocks;
     int sleep;
-    int instructions;
-    int io;
+    int verbose;
     int core;
 } Options;
 

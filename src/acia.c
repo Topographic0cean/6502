@@ -16,7 +16,6 @@
 
 #define BUF_SIZE 16
 
-static int verbose = 0;
 static char input_buffer[BUF_SIZE];
 static int read_buff = 0;
 static int write_buff = 0;
@@ -37,7 +36,7 @@ void push_char(uint8_t c) {
         c = 0x0D;
     input_buffer[write_buff] = c;
     write_buff = (write_buff+1)%BUF_SIZE;
-    if (verbose) log("acia_read_keyboard %c (%d,%d)\n",c,read_buff,write_buff);
+    logger_log(LOGGER_IO,"acia_read_keyboard %c (%d,%d)\n",c,read_buff,write_buff);
 }
 
 void acia_read_keyboard()
@@ -65,6 +64,9 @@ void acia_read_keyboard()
         case 0x10: // Control-P
             cpu_pause();
             break;
+        case 0x12: // Control-R
+            cpu_reset();
+            break;
         case 0x18: // Control-X
             quit(0);
             break;
@@ -77,11 +79,8 @@ void acia_read_keyboard()
     delay = (delay+1)%10000;
 }
 
-void acia_init(int v)
+void acia_init()
 {
-    verbose = v;
-    if (verbose)
-        log("ACIA verbose output\n");
 }
 
 void acia_write(uint8_t address, uint8_t value)

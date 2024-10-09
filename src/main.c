@@ -22,12 +22,12 @@ void initialize(int argc, const     char* argv[])
 {
     options = process_options(argc, argv);
     controls = control_init(options);
-    logger_init(options->instructions|options->io);
+    logger_init(options->verbose);
     window_init();
     ram_init(options);
-    w65c22_init(options->io);
-    acia_init(options->io);
-    display_init(options->io);
+    w65c22_init();
+    acia_init();
+    display_init();
     reset6502();
 }
 
@@ -51,6 +51,11 @@ int main(int argc, const char *argv[])
     int c = 0;
     while (options->clocks == 0 || c < options->clocks)
     {
+        if (controls->reset == 1)
+        {
+            //reset6502();
+            controls->reset = 0;
+        }
         if (controls->nmi == 1)
         {
             nmi6502();
