@@ -17,25 +17,23 @@ DECIMAL   = HEAP+12
 PSTARTLO    = $5E00        ; 3,000,000,000
 PSTARTHI    = $B2D0
 
-FOURBLO     = $2800
-FOURBHI     = $EE6B
+FOURLO      = $2800
+FOURHI      = $EE6B
 
 LED         = $40 ; Make blinky lights
 COUNT       = $41 ; Only display result every 256 computations
-PI          = $50 ; Holds current PI value
 
-ADDSUB      = $58 ; zero if we add, otherwise subtract
-TERM        = $60 ; will hold term we add or subtract to PI
-DIVISOR     = $70
-REM         = $78
-MULT        = $82
+PI          = $52 ; Holds current PI value
+
+N           = $5A ; Hold the current starting multiplier
+MULT        = $62
+RESULT      = $6A
 
 .org START
             lda #$FF
             sta COUNT
             lda #$00
             sta LED
-            sta ADDSUB
             lda #<PSTARTLO
             sta PI
             lda #>PSTARTLO
@@ -44,6 +42,10 @@ MULT        = $82
             sta PI+2
             lda #>PSTARTHI
             sta PI+3
+            
+            lda #$02
+            sta N
+            
             jsr DISPLAY_CLEAR
 
 pi_loop:    inc COUNT
@@ -53,42 +55,132 @@ pi_loop:    inc COUNT
             ;jsr DISPLAY_PORT
             inc LED
 @no_led:
-            ;lda PI
-            ;sta HEAP
-            ;lda PI+1 
-            ;sta HEAP+1
-            ;lda PI+2
-            ;sta HEAP+2
-            ;lda PI+3 
-            ;sta HEAP+3
-            ;jsr display_num
-
-            lda #$04
-            ldx #$03
-            jsr mult
-            sta HEAP
+            lda N
+            sta MULT
             lda #$00
-            sta HEAP+1
-            sta HEAP+2
-            sta HEAP+3
-            jsr display_num
+            sta MULT+1
+            sta MULT+2
+            sta MULT+3
+
+            inc N
+            lda N 
+            jsr mult
+
+            lda RESULT
+            sta MULT
+            lda RESULT+1
+            sta MULT+1
+            lda RESULT+2
+            sta MULT+2
+            lda RESULT+3
+            sta MULT+3
+            inc N
+            lda N
+            jsr mult
+
+            jsr display_result
 
 stop:
             ;jmp pi_loop
             jmp stop
 
-mult:       ; A - multiplicand
-            ; X - multiplier
-            sta MULT
+mult:       ; MULT - multiplicand
+            ; A - multiplier
+            ; RESULT - result of multiplication
+            tay
+            lda #$00
+            sta RESULT
+            sta RESULT+1
+            sta RESULT+2
+            sta RESULT+3
+            tya 
+            tax
 mult_add:
-            dex
             beq mult_done
-            adc MULT
+            lda MULT
+            adc RESULT
+            sta RESULT
+            lda MULT+1
+            adc RESULT+1
+            sta RESULT+1
+            lda MULT+2
+            adc RESULT+2
+            sta RESULT+2
+            lda MULT+3
+            adc RESULT+3
+            sta RESULT+3
+            dex
             jmp mult_add
 mult_done:
             rts
 
+divide:
+            sta TERM
+            sta TERM+1
+            sta TERM+2
+            sta TERM+3
+            LDA #0      ;Initialize REM to 0
+            STA REM
+            STA REM+1
+            STA REM+2
+            STA REM+3
+            LDX #32     ;There are 32 bits 
+L1:         ASL TERM    ;Shift hi bit of TERM into REM
+            ROL TERM+1  ;(vacating the lo bit, which will be used for the quotient)
+            ROL TERM+2  ;(vacating the lo bit, which will be used for the quotient)
+            ROL TERM+3  ;(vacating the lo bit, which will be used for the quotient)
+            ROL REM
+            ROL REM+1
+            ROL REM+2
+            ROL REM+3
+            LDA REM
+            SEC         ;Trial subtraction
+            SBC TDIV
+            STA SUBSAVE
+            LDA REM+1
+            SBC TDIV+1
+            STA SUBSAVE+1
+            LDA REM+2
+            SBC TDIV+2
+            STA SUBSAVE+2
+            LDA REM+3
+            SBC TDIV+3
+            BCC SUBFAIL   ;Did subtraction succeed?
+            STA REM+3     ;If yes, save it
+            lda SUBSAVE
+            sta REM
+            lda SUBSAVE+1
+            sta REM+1
+            lda SUBSAVE+2
+            sta REM+2
+            INC TERM    ;and record a 1 in the quotient
+SUBFAIL:
+            DEX
+            BNE L1
 
+display_pi:
+            lda PI
+            sta HEAP
+            lda PI+1 
+            sta HEAP+1
+            lda PI+2
+            sta HEAP+2
+            lda PI+3 
+            sta HEAP+3
+            jsr display_num
+            rts
+            
+display_result:
+            lda RESULT
+            sta HEAP
+            lda RESULT+1 
+            sta HEAP+1
+            lda RESULT+2
+            sta HEAP+2
+            lda RESULT+3 
+            sta HEAP+3
+            jsr display_num
+            rts
             
 
 
