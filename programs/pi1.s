@@ -21,7 +21,7 @@ COUNT       = $41 ; Only display result every 256 computations
 PI          = $50 ; Each of thse vars are 4 bytes
 N           = $58
 TERM        = $60
-TDIV        = $70
+DIV         = $70
 REM         = $78
 SUBSAVE     = $80
 

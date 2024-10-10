@@ -14,20 +14,24 @@
 
 DECIMAL   = HEAP+12 
 
-PSTARTLO    = $5E00        ; 3,000,000,000
+PSTARTLO    = $5E00         ; 3,000,000,000
 PSTARTHI    = $B2D0
 
-FOURLO      = $2800
+FOURLO      = $2800         ; 4,000,000,000
 FOURHI      = $EE6B
 
-LED         = $40 ; Make blinky lights
-COUNT       = $41 ; Only display result every 256 computations
+LED         = $32           ; Make blinky lights
+COUNT       = $3A           ; Only display result every 256 computations
 
-PI          = $52 ; Holds current PI value
+PI          = $42           ; Holds current PI value
 
-N           = $5A ; Hold the current starting multiplier
-MULT        = $62
-RESULT      = $6A
+N           = $4A           ; Hold the current starting multiplier
+MULT        = $52
+RESULT      = $5A           ; Result of multiplication. will be used as divisor 
+NUMERATOR   = $62           ; Will start with 4,000,000,000 and will hold result of division
+REM         = $6A           ; Holds remainder of division
+SAVE        = $72           ; holds last subtraction
+ADD         = $7A           ; even if we should add term
 
 .org START
             lda #$FF
@@ -55,6 +59,9 @@ pi_loop:    inc COUNT
             ;jsr DISPLAY_PORT
             inc LED
 @no_led:
+            ; First thing is to caclulate the denominator of the next
+            ; term.  This will start with 2*3*4 then next term is
+            ; 4*5*6.   RESULT will hold the multiplication at the end.
             lda N
             sta MULT
             lda #$00
@@ -78,10 +85,60 @@ pi_loop:    inc COUNT
             lda N
             jsr mult
 
-            jsr display_result
+            ;  Now we calculate 4 / RESULT.  First load NUMERATOR with
+            ; 4,000,000 then divide it by RESULT
+            lda #<FOURLO
+            sta NUMERATOR
+            lda #>FOURLO
+            sta NUMERATOR+1
+            lda #<FOURHI
+            sta NUMERATOR+2
+            lda #>FOURHI
+            sta NUMERATOR+3 
+            jsr divide
 
+            ; finally, add to PI if ADD is even,
+            ; otherwise subtract
+            lda ADD
+            and #$01
+            beq even
+
+            sec				    ; set carry for borrow
+            lda PI
+            sbc NUMERATOR			; perform subtraction on the LSBs
+            sta PI
+            lda PI+1			; do the same for the MSBs, with carry
+            sbc NUMERATOR+1			; set according to the previous result
+            sta PI+1
+            lda PI+2			; do the same for the MSBs, with carry
+            sbc NUMERATOR+2			; set according to the previous result
+            sta PI+2
+            lda PI+3			; do the same for the MSBs, with carry
+            sbc NUMERATOR+3			; set according to the previous result
+            sta PI+3
+            jmp display_value
+even:
+            lda PI
+            adc NUMERATOR
+            sta PI
+            lda PI+1
+            adc NUMERATOR+1
+            sta PI+1
+            lda PI+2
+            adc NUMERATOR+2
+            sta PI+2
+            lda PI+3
+            adc NUMERATOR+3
+            sta PI+3
+
+display_value:
+            inc ADD
+            jsr display_pi
+
+            lda N
+            beq stop
+            jmp pi_loop
 stop:
-            ;jmp pi_loop
             jmp stop
 
 mult:       ; MULT - multiplicand
@@ -115,48 +172,45 @@ mult_done:
             rts
 
 divide:
-            sta TERM
-            sta TERM+1
-            sta TERM+2
-            sta TERM+3
-            LDA #0      ;Initialize REM to 0
+            LDA #0              ;Initialize REM to 0
             STA REM
             STA REM+1
             STA REM+2
             STA REM+3
-            LDX #32     ;There are 32 bits 
-L1:         ASL TERM    ;Shift hi bit of TERM into REM
-            ROL TERM+1  ;(vacating the lo bit, which will be used for the quotient)
-            ROL TERM+2  ;(vacating the lo bit, which will be used for the quotient)
-            ROL TERM+3  ;(vacating the lo bit, which will be used for the quotient)
+            LDX #32             ;There are 32 bits 
+L1:         ASL NUMERATOR       ;Shift hi bit of TERM into REM
+            ROL NUMERATOR+1     ;(vacating the lo bit, which will be used for the quotient)
+            ROL NUMERATOR+2     ;(vacating the lo bit, which will be used for the quotient)
+            ROL NUMERATOR+3     ;(vacating the lo bit, which will be used for the quotient)
             ROL REM
             ROL REM+1
             ROL REM+2
             ROL REM+3
             LDA REM
-            SEC         ;Trial subtraction
-            SBC TDIV
-            STA SUBSAVE
+            SEC                 ;Trial subtraction
+            SBC RESULT
+            STA SAVE
             LDA REM+1
-            SBC TDIV+1
-            STA SUBSAVE+1
+            SBC RESULT+1
+            STA SAVE+1
             LDA REM+2
-            SBC TDIV+2
-            STA SUBSAVE+2
+            SBC RESULT+2
+            STA SAVE+2
             LDA REM+3
-            SBC TDIV+3
-            BCC SUBFAIL   ;Did subtraction succeed?
-            STA REM+3     ;If yes, save it
-            lda SUBSAVE
+            SBC RESULT+3
+            BCC subfail     ;Did subtraction succeed?
+            STA REM+3       ;If yes, save it
+            lda SAVE
             sta REM
-            lda SUBSAVE+1
+            lda SAVE+1
             sta REM+1
-            lda SUBSAVE+2
+            lda SAVE+2
             sta REM+2
-            INC TERM    ;and record a 1 in the quotient
-SUBFAIL:
+            INC NUMERATOR    ;and record a 1 in the quotient
+subfail:
             DEX
             BNE L1
+            rts
 
 display_pi:
             lda PI
@@ -183,6 +237,17 @@ display_result:
             rts
             
 
+display_numerator:
+            lda NUMERATOR
+            sta HEAP
+            lda NUMERATOR+1 
+            sta HEAP+1
+            lda NUMERATOR+2
+            sta HEAP+2
+            lda NUMERATOR+3 
+            sta HEAP+3
+            jsr display_num
+            rts
 
 
 
