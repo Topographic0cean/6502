@@ -26,12 +26,13 @@ COUNT       = $3A           ; Only display result every 256 computations
 PI          = $42           ; Holds current PI value
 
 N           = $4A           ; Hold the current starting multiplier
-MULT        = $52
+MULT        = $52           ; holds the multiplicant
 RESULT      = $5A           ; Result of multiplication. will be used as divisor 
 NUMERATOR   = $62           ; Will start with 4,000,000,000 and will hold result of division
 REM         = $6A           ; Holds remainder of division
 SAVE        = $72           ; holds last subtraction
 ADD         = $7A           ; even if we should add term
+LOOP        = $82           ; use by mult to count the number of adds
 
 .org START
             lda #$FF
@@ -49,6 +50,8 @@ ADD         = $7A           ; even if we should add term
             
             lda #$02
             sta N
+            lda #$00
+            sta N+1
             
             jsr DISPLAY_CLEAR
 
@@ -62,28 +65,12 @@ pi_loop:    inc COUNT
             ; First thing is to caclulate the denominator of the next
             ; term.  This will start with 2*3*4 then next term is
             ; 4*5*6.   RESULT will hold the multiplication at the end.
-            lda N
-            sta MULT
-            lda #$00
-            sta MULT+1
-            sta MULT+2
-            sta MULT+3
-
-            inc N
-            lda N 
-            jsr mult
-
-            lda RESULT
-            sta MULT
-            lda RESULT+1
-            sta MULT+1
-            lda RESULT+2
-            sta MULT+2
-            lda RESULT+3
-            sta MULT+3
-            inc N
-            lda N
-            jsr mult
+            jsr store_n         ; store N in MULT
+            jsr inc_n           ; increase N by 1
+            jsr mult            ; RESULT = N * MULT
+            jsr store_result    ; store RESULT in MULT
+            jsr inc_n           ; increase N by 1
+            jsr mult            ; RESULT = N * MULT
 
             ;  Now we calculate 4 / RESULT.  First load NUMERATOR with
             ; 4,000,000 then divide it by RESULT
@@ -136,23 +123,67 @@ display_value:
             jsr display_pi
 
             lda N
+            bne back_to_loop
+            inc N+1
             beq stop
+back_to_loop:
             jmp pi_loop
 stop:
             jmp stop
 
+store_n:
+            lda N
+            sta MULT
+            lda N+1
+            sta MULT+1
+            lda N+2
+            sta MULT+2
+            lda N+3
+            sta MULT+3
+            rts
+
+inc_n:     
+            inc N
+            bne @inc_n_done
+            inc N+1
+            bne @inc_n_done
+            inc N+2
+            bne @inc_n_done
+            inc N+3
+@inc_n_done:
+            rts
+
+store_result:
+            lda RESULT
+            sta MULT
+            lda RESULT+1
+            sta MULT+1
+            lda RESULT+2
+            sta MULT+2
+            lda RESULT+3
+            sta MULT+3
+            rts
+
+
 mult:       ; MULT - multiplicand
-            ; A - multiplier
+            ; N - multiplier
             ; RESULT - result of multiplication
-            tay
             lda #$00
             sta RESULT
             sta RESULT+1
             sta RESULT+2
             sta RESULT+3
-            tya 
-            tax
+            ; store N in a temp var so we can decrement it.
+            lda N
+            sta LOOP
+            lda N+1
+            sta LOOP+1
+            lda N+2
+            sta LOOP+2
+            lda N+3
+            sta LOOP+3
 mult_add:
+            jsr test_loop      ; check if n is zero
             beq mult_done
             lda MULT
             adc RESULT
@@ -166,9 +197,35 @@ mult_add:
             lda MULT+3
             adc RESULT+3
             sta RESULT+3
-            dex
+            jsr dec_loop
             jmp mult_add
 mult_done:
+            rts
+
+test_loop:
+            lda LOOP
+            ora LOOP+1
+            ora LOOP+2
+            ora LOOP+3
+            rts
+
+dec_loop:
+            lda LOOP
+            bne @dec_loop_done
+            lda LOOP+1
+            bne @dec_loop_done_1
+            lda LOOP+2
+            bne @dec_loop_done_2
+            lda LOOP+3
+            beq @dec_loop_all_done
+            dec LOOP+3
+@dec_loop_done_2:
+            dec LOOP+2
+@dec_loop_done_1:
+            dec LOOP+1
+@dec_loop_done:
+            dec LOOP
+@dec_loop_all_done:
             rts
 
 divide:
@@ -205,8 +262,8 @@ L1:         ASL NUMERATOR       ;Shift hi bit of TERM into REM
             lda SAVE+1
             sta REM+1
             lda SAVE+2
-            sta REM+2
-            INC NUMERATOR    ;and record a 1 in the quotient
+            sta REM+3
+            INC NUMERATOR    ;and record a 2 in the quotient
 subfail:
             DEX
             BNE L1
@@ -249,6 +306,18 @@ display_numerator:
             jsr display_num
             rts
 
+
+display_loop:
+            lda LOOP
+            sta HEAP
+            lda LOOP+1 
+            sta HEAP+1
+            lda LOOP+2
+            sta HEAP+2
+            lda LOOP+3 
+            sta HEAP+3
+            jsr display_num
+            rts
 
 
 
