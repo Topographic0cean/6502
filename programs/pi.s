@@ -69,8 +69,11 @@ pi_loop:    inc COUNT
             jsr inc_n           ; increase N by 1
             jsr mult            ; RESULT = N * MULT
             jsr store_result    ; store RESULT in MULT
-            jsr inc_n           ; increase N by 1
-            jsr mult            ; RESULT = N * MULT
+            ;jsr inc_n           ; increase N by 1
+            ;jsr mult            ; RESULT = N * MULT
+            jsr display_result
+            jsr delay
+            jsr @no_led
 
             ;  Now we calculate 4 / RESULT.  First load NUMERATOR with
             ; 4,000,000 then divide it by RESULT
@@ -281,6 +284,18 @@ display_pi:
             jsr display_num
             rts
             
+display_n:
+            lda N
+            sta HEAP
+            lda N+1 
+            sta HEAP+1
+            lda N+2
+            sta HEAP+2
+            lda N+3 
+            sta HEAP+3
+            jsr display_num
+            rts
+            
 display_result:
             lda RESULT
             sta HEAP
@@ -320,7 +335,6 @@ display_loop:
             rts
 
 
-
 display_num:
             jsr DISPLAY_HOME
             jsr HEXTODEC
@@ -333,3 +347,19 @@ display_num:
             jmp @output
 @done:
             rts
+
+delay:
+            ldy #$20
+@loop_x:    
+            ldx #$FF
+@loop_a:
+            lda #$FF
+@delay_loop:
+            sbc #$01
+            bne @delay_loop
+            dex 
+            bne @loop_a
+            dey 
+            bne @loop_x
+            rts
+           

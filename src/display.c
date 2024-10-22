@@ -157,14 +157,15 @@ void display_set_status(uint8_t s)
 
 void display_write_four_bits(uint8_t d)
 {
-    logger_log(LOGGER_IO,"display: write four bit %x\n", d);
     if (hi)
     {
+        logger_log(LOGGER_IO,"display: write four bit high %x\n", d);
         data = d & 0x0f;
         hi = 0;
     }
     else
     {
+        logger_log(LOGGER_IO,"display: write four bit low %x\n", d);
         data = (data << 4) | (d & 0x0f);
         hi = 1;
         if (d & DISPLAY_RS)

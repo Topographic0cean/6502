@@ -12,6 +12,7 @@ void logger_init(int verbose) {
     if (logger_level) {
         logfile = fopen("emulator.log","a");
         fprintf(logfile,"LOGGING...\n");
+        fflush(logfile);
     }
 }
 
@@ -20,7 +21,8 @@ void logger_log(int level, char* fmt, ...) {
 
     if (level > 0 && level <= logger_level) {
         va_start(valist,fmt);
-        fprintf(logfile, fmt, valist);
+        vfprintf(logfile, fmt, valist);
+        fflush(logfile);
         va_end(valist);
     }
 }
