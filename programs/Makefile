@@ -1,4 +1,7 @@
-all: counter.prg pi.prg hello.prg mult.prg
+all: defines counter.prg pi.prg hello.prg mult.prg
+
+defines:
+	./update_defines
 
 counter.prg: counter.s
 	ca65 -o counter.o counter.s -l counter.list

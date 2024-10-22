@@ -8,4 +8,5 @@ obj
 *.load
 *.prg
 tmp
+defines.old
 .vscode

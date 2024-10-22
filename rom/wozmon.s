@@ -169,3 +169,4 @@ LOAD:       rts
 .include "via.s"
 .include "hextodec.s"
 .include "vectors.s"
+.include "math.s"

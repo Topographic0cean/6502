@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+cp defines.s defines.old
+cp defines.s /tmp/def
+for sub in MONRDKEY DISPLAY_CLEAR DISPLAY_HOME DISPLAY_PUTC VIA_CTS HEXTODEC MULT32; do
+    addr=$(grep -e "$sub\$" ../rom/msbasic/msbasic.lbl| awk '{print $2}')
+    sed "/$sub/d" < /tmp/def > /tmp/del
+    echo -e "$sub  \t= \$$addr" >> /tmp/del
+    mv /tmp/del /tmp/def
+done
+
+mv /tmp/def defines.s

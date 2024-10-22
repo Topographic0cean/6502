@@ -5,10 +5,10 @@
 
 N           = $32           ; Hold the current starting multiplier
 
-DECIMAL     = HEAP+12 
-MULTP       = $4A           ; Hold the current starting multiplier
-MULTC       = $52           ; holds the multiplicant
-RESULT      = $5A           ; Result of multiplication. will be used as divisor 
+DECIMAL   = HEAP+12 
+MULTC     = HEAP    ; multiplicand
+MULTP     = HEAP+4  ; multiplier
+RESULT    = HEAP+8  ; result of multiplication
 
 .org START
             jsr DISPLAY_CLEAR
@@ -18,14 +18,40 @@ RESULT      = $5A           ; Result of multiplication. will be used as divisor
             sta N+1
             sta N+2
             sta N+3
-            jsr display_n
+loop:
             jsr store_multp
             jsr inc_n
             jsr store_multc
-            jsr mult
+            jsr MULT32
             jsr display_result
+            jsr delay
+            jsr delay
+            jsr delay
+            jsr delay
+            jsr delay
 done:   
-            jmp done
+            jmp loop
+
+delay:
+            phx
+            phy
+            pha
+            ldx #$02
+@delay_y:   
+            ldy #$FF
+@delay_a:
+            lda #$FF
+@loop_a:
+            sbc #$01
+            bne @loop_a
+            dey
+            bne @delay_a
+            dex
+            bne @delay_y
+            pla
+            ply
+            plx
+            rts
 
 store_multp:
             lda N 
@@ -91,58 +117,4 @@ display_num:
             iny
             jmp @output
 @done:
-            rts
-
-mult:       ; MULTC     - multiplicand
-            ; MULTP     - multiplier
-            ; RESULT    - result of multiplication
-            lda #$00
-            sta RESULT
-            sta RESULT+1
-            sta RESULT+2
-            sta RESULT+3
-mult_add:
-            jsr test_multp       ; check if MULTP is zero
-            beq mult_done
-            lda MULTC
-            adc RESULT
-            sta RESULT
-            lda MULTC+1
-            adc RESULT+1
-            sta RESULT+1
-            lda MULTC+2
-            adc RESULT+2
-            sta RESULT+2
-            lda MULTC+3
-            adc RESULT+3
-            sta RESULT+3
-            jsr dec_multp
-            jmp mult_add
-mult_done:
-            rts
-
-test_multp:
-            lda MULTP
-            ora MULTP+1
-            ora MULTP+2
-            ora MULTP+3
-            rts
-
-dec_multp:
-            lda MULTP
-            bne @dec_done
-            lda MULTP+1
-            bne @dec_done_1
-            lda MULTP+2
-            bne @dec_done_2
-            lda MULTP+3
-            beq @dec_all_done
-            dec MULTP+3
-@dec_done_2:
-            dec MULTP+2
-@dec_done_1:
-            dec MULTP+1
-@dec_done:
-            dec MULTP
-@dec_all_done:
-            rts
+    
