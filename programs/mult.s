@@ -117,4 +117,4 @@ display_num:
             iny
             jmp @output
 @done:
-    
+            rts
