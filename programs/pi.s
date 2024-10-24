@@ -89,7 +89,7 @@ pi_loop:    inc COUNT
             sta NUMERATOR+2
             lda #>FOURHI
             sta NUMERATOR+3 
-            ;jsr DIVIDE32
+            jsr DIVIDE32
 
             ; finally, add to PI if ADD is even,
             ; otherwise subtract
@@ -132,6 +132,7 @@ display_value:
             bne back_to_loop
             inc N+1
             beq stop
+            jmp stop
 back_to_loop:
             jmp pi_loop
 stop:
