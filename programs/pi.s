@@ -12,8 +12,6 @@
 .debuginfo
 .include "defines.s"
 
-DECIMAL   = HEAP+12 
-
 PSTARTLO    = $5E00         ; 3,000,000,000
 PSTARTHI    = $B2D0
 
@@ -26,13 +24,17 @@ COUNT       = $3A           ; Only display result every 256 computations
 PI          = $42           ; Holds current PI value
 
 N           = $4A           ; Hold the current starting multiplier
-MULT        = $52           ; holds the multiplicant
-RESULT      = $5A           ; Result of multiplication. will be used as divisor 
+DIVISOR     = $52
+
 NUMERATOR   = $62           ; Will start with 4,000,000,000 and will hold result of division
 REM         = $6A           ; Holds remainder of division
 SAVE        = $72           ; holds last subtraction
 ADD         = $7A           ; even if we should add term
-LOOP        = $82           ; use by mult to count the number of adds
+
+MULTC       = HEAP    ; multiplicand
+MULTP       = HEAP+4  ; multiplier
+RESULT      = HEAP+8  ; result of multiplication
+DECIMAL     = HEAP+12 
 
 .org START
             lda #$FF
@@ -52,6 +54,8 @@ LOOP        = $82           ; use by mult to count the number of adds
             sta N
             lda #$00
             sta N+1
+            sta N+2
+            sta N+3
             
             jsr DISPLAY_CLEAR
 
@@ -65,18 +69,18 @@ pi_loop:    inc COUNT
             ; First thing is to caclulate the denominator of the next
             ; term.  This will start with 2*3*4 then next term is
             ; 4*5*6.   RESULT will hold the multiplication at the end.
-            jsr store_n         ; store N in MULT
+            jsr store_multc     ; store N in MULTC
             jsr inc_n           ; increase N by 1
-            jsr mult            ; RESULT = N * MULT
-            jsr store_result    ; store RESULT in MULT
-            ;jsr inc_n           ; increase N by 1
-            ;jsr mult            ; RESULT = N * MULT
-            jsr display_result
-            jsr delay
-            jsr @no_led
+            jsr store_multp     ; store N in MULTP
+            jsr MULT32          ; RESULT = N * MULT
+            jsr store_result    ; store RESULT in MULTC
+            jsr inc_n           ; increase N by 1
+            jsr store_multp     ; store N in MULTP
+            jsr MULT32          ; RESULT = N * MULT
+            jsr store_divisor   ; store RESULT in DIVISOR
 
-            ;  Now we calculate 4 / RESULT.  First load NUMERATOR with
-            ; 4,000,000 then divide it by RESULT
+            ;  Now we calculate 4 / DIVISOR.  
+            ; First load NUMERATOR with 4,000,000
             lda #<FOURLO
             sta NUMERATOR
             lda #>FOURLO
@@ -85,7 +89,7 @@ pi_loop:    inc COUNT
             sta NUMERATOR+2
             lda #>FOURHI
             sta NUMERATOR+3 
-            jsr divide
+            ;jsr DIVIDE32
 
             ; finally, add to PI if ADD is even,
             ; otherwise subtract
@@ -106,7 +110,6 @@ pi_loop:    inc COUNT
             lda PI+3			; do the same for the MSBs, with carry
             sbc NUMERATOR+3			; set according to the previous result
             sta PI+3
-            jmp display_value
 even:
             lda PI
             adc NUMERATOR
@@ -134,16 +137,28 @@ back_to_loop:
 stop:
             jmp stop
 
-store_n:
+store_multp:
             lda N
-            sta MULT
+            sta MULTP
             lda N+1
-            sta MULT+1
+            sta MULTP+1
             lda N+2
-            sta MULT+2
+            sta MULTP+2
             lda N+3
-            sta MULT+3
+            sta MULTP+3
             rts
+            
+store_multc:
+            lda N
+            sta MULTC
+            lda N+1
+            sta MULTC+1
+            lda N+2
+            sta MULTC+2
+            lda N+3
+            sta MULTC+3
+            rts
+
 
 inc_n:     
             inc N
@@ -158,80 +173,27 @@ inc_n:
 
 store_result:
             lda RESULT
-            sta MULT
+            sta MULTC
             lda RESULT+1
-            sta MULT+1
+            sta MULTC+1
             lda RESULT+2
-            sta MULT+2
+            sta MULTC+2
             lda RESULT+3
-            sta MULT+3
+            sta MULTC+3
             rts
 
-
-mult:       ; MULT - multiplicand
-            ; N - multiplier
-            ; RESULT - result of multiplication
-            lda #$00
-            sta RESULT
-            sta RESULT+1
-            sta RESULT+2
-            sta RESULT+3
-            ; store N in a temp var so we can decrement it.
-            lda N
-            sta LOOP
-            lda N+1
-            sta LOOP+1
-            lda N+2
-            sta LOOP+2
-            lda N+3
-            sta LOOP+3
-mult_add:
-            jsr test_loop      ; check if n is zero
-            beq mult_done
-            lda MULT
-            adc RESULT
-            sta RESULT
-            lda MULT+1
-            adc RESULT+1
-            sta RESULT+1
-            lda MULT+2
-            adc RESULT+2
-            sta RESULT+2
-            lda MULT+3
-            adc RESULT+3
-            sta RESULT+3
-            jsr dec_loop
-            jmp mult_add
-mult_done:
+store_divisor:
+            lda RESULT
+            sta DIVISOR
+            lda RESULT+1
+            sta DIVISOR+1
+            lda RESULT+2
+            sta DIVISOR+2
+            lda RESULT+3
+            sta DIVISOR+3
             rts
 
-test_loop:
-            lda LOOP
-            ora LOOP+1
-            ora LOOP+2
-            ora LOOP+3
-            rts
-
-dec_loop:
-            lda LOOP
-            bne @dec_loop_done
-            lda LOOP+1
-            bne @dec_loop_done_1
-            lda LOOP+2
-            bne @dec_loop_done_2
-            lda LOOP+3
-            beq @dec_loop_all_done
-            dec LOOP+3
-@dec_loop_done_2:
-            dec LOOP+2
-@dec_loop_done_1:
-            dec LOOP+1
-@dec_loop_done:
-            dec LOOP
-@dec_loop_all_done:
-            rts
-
-divide:
+DIVIDE32:
             LDA #0              ;Initialize REM to 0
             STA REM
             STA REM+1
@@ -248,16 +210,16 @@ L1:         ASL NUMERATOR       ;Shift hi bit of TERM into REM
             ROL REM+3
             LDA REM
             SEC                 ;Trial subtraction
-            SBC RESULT
+            SBC DIVISOR
             STA SAVE
             LDA REM+1
-            SBC RESULT+1
+            SBC DIVISOR+1
             STA SAVE+1
             LDA REM+2
-            SBC RESULT+2
+            SBC DIVISOR+2
             STA SAVE+2
             LDA REM+3
-            SBC RESULT+3
+            SBC DIVISOR+3
             BCC subfail     ;Did subtraction succeed?
             STA REM+3       ;If yes, save it
             lda SAVE
@@ -320,20 +282,6 @@ display_numerator:
             sta HEAP+3
             jsr display_num
             rts
-
-
-display_loop:
-            lda LOOP
-            sta HEAP
-            lda LOOP+1 
-            sta HEAP+1
-            lda LOOP+2
-            sta HEAP+2
-            lda LOOP+3 
-            sta HEAP+3
-            jsr display_num
-            rts
-
 
 display_num:
             jsr DISPLAY_HOME

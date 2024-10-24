@@ -24,34 +24,14 @@ loop:
             jsr store_multc
             jsr MULT32
             jsr display_result
-            jsr delay
-            jsr delay
-            jsr delay
-            jsr delay
-            jsr delay
+            jsr ONE_SEC_DELAY
+            jsr ONE_SEC_DELAY
+            jsr ONE_SEC_DELAY
+            jsr ONE_SEC_DELAY
+            jsr ONE_SEC_DELAY
 done:   
             jmp loop
 
-delay:
-            phx
-            phy
-            pha
-            ldx #$02
-@delay_y:   
-            ldy #$FF
-@delay_a:
-            lda #$FF
-@loop_a:
-            sbc #$01
-            bne @loop_a
-            dey
-            bne @delay_a
-            dex
-            bne @delay_y
-            pla
-            ply
-            plx
-            rts
 
 store_multp:
             lda N 

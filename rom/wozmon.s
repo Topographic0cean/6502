@@ -170,3 +170,4 @@ LOAD:       rts
 .include "hextodec.s"
 .include "vectors.s"
 .include "math.s"
+.include "lib.s"
