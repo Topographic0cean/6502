@@ -1,8 +1,3 @@
-#!/usr/bin/env bash
-
-cp include/defines.s include/defines.old
-
-> include/defines.s cat <<"EOF"
 ; RAM address space
 
 ; Zero Page
@@ -21,10 +16,11 @@ HEAP                = $0400     ; 256 bytes of general storage area used by ROM
 STORAGE             = $0500     ; $0500 - $1FFF General storage area for RAM programs
 
 START               = $2000     ; Good place to put the RAM program
-EOF
-
-for sub in MONRDKEY DISPLAY_CLEAR DISPLAY_HOME DISPLAY_PUTC VIA_CTS HEXTODEC MULT32 ONE_SEC_DELAY; do
-    addr=$(grep -e "$sub\$" ../rom/msbasic/msbasic.lbl| awk '{print $2}')
-    echo -e "$sub  \t= \$$addr" >> include/defines.s
-done
-
+MONRDKEY  	= $00A0EB
+DISPLAY_CLEAR  	= $00A183
+DISPLAY_HOME  	= $00A189
+DISPLAY_PUTC  	= $00A18F
+VIA_CTS  	= $00A1C2
+HEXTODEC  	= $00A22B
+MULT32  	= $00A2DE
+ONE_SEC_DELAY  	= $00A34B

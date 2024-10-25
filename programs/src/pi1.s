@@ -9,7 +9,7 @@
 ;
 .setcpu   "65C02"
 .debuginfo
-.include "defines.s"
+.include "../include/defines.s"
 
 DECIMAL   = HEAP+12 
 
@@ -24,6 +24,7 @@ TERM        = $60
 DIV         = $70
 REM         = $78
 SUBSAVE     = $80
+TDIV        = $90
 
 .org START
             lda #$FF

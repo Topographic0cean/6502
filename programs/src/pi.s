@@ -10,7 +10,7 @@
 ;
 .setcpu   "65C02"
 .debuginfo
-.include "defines.s"
+.include "../include/defines.s"
 
 PSTARTLO    = $5E00         ; 3,000,000,000
 PSTARTHI    = $B2D0
@@ -132,7 +132,6 @@ display_value:
             bne back_to_loop
             inc N+1
             beq stop
-            jmp stop
 back_to_loop:
             jmp pi_loop
 stop:

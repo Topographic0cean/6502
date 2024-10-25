@@ -5,7 +5,7 @@
 
 .setcpu   "65C02"
 .debuginfo
-.include "defines.s"
+.include "../include/defines.s"
 
 .org START
                 jsr DISPLAY_CLEAR

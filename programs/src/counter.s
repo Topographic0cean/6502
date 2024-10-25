@@ -5,7 +5,7 @@
 
 .setcpu   "65C02"
 .debuginfo
-.include "defines.s"
+.include "../include/defines.s"
 
 DECIMAL   = HEAP+12 
 COUNT     = $1000 ; 2 bytes
