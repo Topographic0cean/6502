@@ -6,6 +6,7 @@ PROGS = $(patsubst %.s, $(BIN)/%.prg, $(wildcard *.s))
 all: $(PROGS)
 
 $(BIN)/%.o: %.s
+	@mkdir -p $(BIN)
 	ca65 -o $@ $< -l $(BIN)/$(basename $@).list
 
 $(BIN)/%.bin: $(BIN)/%.o

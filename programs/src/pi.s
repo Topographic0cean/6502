@@ -24,16 +24,16 @@ COUNT       = $3A           ; Only display result every 256 computations
 PI          = $42           ; Holds current PI value
 
 N           = $4A           ; Hold the current starting multiplier
-DIVISOR     = $52
 
-NUMERATOR   = $62           ; Will start with 4,000,000,000 and will hold result of division
-REM         = $6A           ; Holds remainder of division
-SAVE        = $72           ; holds last subtraction
 ADD         = $7A           ; even if we should add term
 
 MULTC       = HEAP    ; multiplicand
 MULTP       = HEAP+4  ; multiplier
 RESULT      = HEAP+8  ; result of multiplication
+
+DIVIDEND    = HEAP         
+DIVISOR     = HEAP+4       
+
 DECIMAL     = HEAP+12 
 
 .org START
@@ -80,15 +80,15 @@ pi_loop:    inc COUNT
             jsr store_divisor   ; store RESULT in DIVISOR
 
             ;  Now we calculate 4 / DIVISOR.  
-            ; First load NUMERATOR with 4,000,000
+            ; First load DIVIDEND with 4,000,000
             lda #<FOURLO
-            sta NUMERATOR
+            sta DIVIDEND
             lda #>FOURLO
-            sta NUMERATOR+1
+            sta DIVIDEND+1
             lda #<FOURHI
-            sta NUMERATOR+2
+            sta DIVIDEND+2
             lda #>FOURHI
-            sta NUMERATOR+3 
+            sta DIVIDEND+3 
             jsr DIVIDE32
 
             ; finally, add to PI if ADD is even,
@@ -99,29 +99,29 @@ pi_loop:    inc COUNT
 
             sec				    ; set carry for borrow
             lda PI
-            sbc NUMERATOR			; perform subtraction on the LSBs
+            sbc DIVIDEND			; perform subtraction on the LSBs
             sta PI
             lda PI+1			; do the same for the MSBs, with carry
-            sbc NUMERATOR+1			; set according to the previous result
+            sbc DIVIDEND+1			; set according to the previous result
             sta PI+1
             lda PI+2			; do the same for the MSBs, with carry
-            sbc NUMERATOR+2			; set according to the previous result
+            sbc DIVIDEND+2			; set according to the previous result
             sta PI+2
             lda PI+3			; do the same for the MSBs, with carry
-            sbc NUMERATOR+3			; set according to the previous result
+            sbc DIVIDEND+3			; set according to the previous result
             sta PI+3
 even:
             lda PI
-            adc NUMERATOR
+            adc DIVIDEND
             sta PI
             lda PI+1
-            adc NUMERATOR+1
+            adc DIVIDEND+1
             sta PI+1
             lda PI+2
-            adc NUMERATOR+2
+            adc DIVIDEND+2
             sta PI+2
             lda PI+3
-            adc NUMERATOR+3
+            adc DIVIDEND+3
             sta PI+3
 
 display_value:
@@ -193,47 +193,6 @@ store_divisor:
             sta DIVISOR+3
             rts
 
-DIVIDE32:
-            LDA #0              ;Initialize REM to 0
-            STA REM
-            STA REM+1
-            STA REM+2
-            STA REM+3
-            LDX #32             ;There are 32 bits 
-L1:         ASL NUMERATOR       ;Shift hi bit of TERM into REM
-            ROL NUMERATOR+1     ;(vacating the lo bit, which will be used for the quotient)
-            ROL NUMERATOR+2     ;(vacating the lo bit, which will be used for the quotient)
-            ROL NUMERATOR+3     ;(vacating the lo bit, which will be used for the quotient)
-            ROL REM
-            ROL REM+1
-            ROL REM+2
-            ROL REM+3
-            LDA REM
-            SEC                 ;Trial subtraction
-            SBC DIVISOR
-            STA SAVE
-            LDA REM+1
-            SBC DIVISOR+1
-            STA SAVE+1
-            LDA REM+2
-            SBC DIVISOR+2
-            STA SAVE+2
-            LDA REM+3
-            SBC DIVISOR+3
-            BCC subfail     ;Did subtraction succeed?
-            STA REM+3       ;If yes, save it
-            lda SAVE
-            sta REM
-            lda SAVE+1
-            sta REM+1
-            lda SAVE+2
-            sta REM+3
-            INC NUMERATOR    ;and record a 2 in the quotient
-subfail:
-            DEX
-            BNE L1
-            rts
-
 display_pi:
             lda PI
             sta HEAP
@@ -271,14 +230,14 @@ display_result:
             rts
             
 
-display_numerator:
-            lda NUMERATOR
+display_dividend:
+            lda DIVIDEND
             sta HEAP
-            lda NUMERATOR+1 
+            lda DIVIDEND+1 
             sta HEAP+1
-            lda NUMERATOR+2
+            lda DIVIDEND+2
             sta HEAP+2
-            lda NUMERATOR+3 
+            lda DIVIDEND+3 
             sta HEAP+3
             jsr display_num
             rts

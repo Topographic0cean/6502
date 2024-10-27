@@ -1,4 +1,15 @@
 #!/usr/bin/env bash
+entrypoints="\
+    DISPLAY_CLEAR \
+    DISPLAY_HOME \
+    DISPLAY_PUTC \
+    DIVIDE32 \
+    HEXTODEC \
+    MONRDKEY \
+    MULT32 \
+    ONE_SEC_DELAY \
+    VIA_CTS \
+"
 
 cp include/defines.s include/defines.old
 
@@ -23,7 +34,7 @@ STORAGE             = $0500     ; $0500 - $1FFF General storage area for RAM pro
 START               = $2000     ; Good place to put the RAM program
 EOF
 
-for sub in MONRDKEY DISPLAY_CLEAR DISPLAY_HOME DISPLAY_PUTC VIA_CTS HEXTODEC MULT32 ONE_SEC_DELAY; do
+for sub in $entrypoints; do
     addr=$(grep -e "$sub\$" ../rom/msbasic/msbasic.lbl| awk '{print $2}')
     echo -e "$sub  \t= \$$addr" >> include/defines.s
 done

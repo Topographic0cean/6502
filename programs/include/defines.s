@@ -16,11 +16,12 @@ HEAP                = $0400     ; 256 bytes of general storage area used by ROM
 STORAGE             = $0500     ; $0500 - $1FFF General storage area for RAM programs
 
 START               = $2000     ; Good place to put the RAM program
-MONRDKEY  	= $00A0EB
 DISPLAY_CLEAR  	= $00A183
 DISPLAY_HOME  	= $00A189
 DISPLAY_PUTC  	= $00A18F
-VIA_CTS  	= $00A1C2
+DIVIDE32  	= $00A34B
 HEXTODEC  	= $00A22B
+MONRDKEY  	= $00A0EB
 MULT32  	= $00A2DE
-ONE_SEC_DELAY  	= $00A34B
+ONE_SEC_DELAY  	= $00A3BA
+VIA_CTS  	= $00A1C2

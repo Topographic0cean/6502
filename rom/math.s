@@ -66,50 +66,55 @@ MULT32_DEC_MULTP:
 
 
 ; Divide a 32 bit number in HEAP by a 32 bit number in HEAP+4
-; Puts the result in HEAP+8
-;DIVIDEND    = HEAP
-;DIVISOR     = HEAP+4
-;QUOTIENT    = HEAP+8
-;MODULO      = HEAP+12
-;
-;DIVIDE32:   pha
-;            phx
-;            phy
-;            ldy     #32         ; 32 bits
-;            lda     #0
-;            sta     MODULO
-;            sta     MODULO+1
-;            sta     MODULO+2
-;            sta     MODULO+3
-;NXT_BIT:    asl     DIVIDEND
-;            rol     DIVIDEND+1
-;            rol     DIVIDEND+2
-;            rol     DIVIDEND+3
-;            rol     MODULO
-;            rol     MODULO+1
-;            rol     MODULO+2
-;            rol     MODULO+3
-;            ldx     #$00
-;            lda     #$08
-;            sta     ADDDP
-;            sec
-;SUBT:      lda     DVDR+8,x   ;Subtract divider from
-;           sbc     DVDR,x     ; partial dividend and
-;           sta     MULR,x     ; save
-;           inx
-;           dec     ADDDP
-;           bne     SUBT
-;           bcc     NXT        ;Branch to do next bit
-;           inc     DVDQUO     ; if result = or -
-;           ldx     #$08       ;Put subtractor result
-;RSULT:     lda     MULR-1,x   ; into partial dividend
-;           sta     DVDR+7,x
-;           dex
-;           bne     RSULT
-;NXT:       dey
-;           bne     DO_NXT_BIT
-;           sec
-;           lda     DIVXP1     ;Subtract dps and store result
-;           sbc     DIVXP2
-;           sta     DIVXP2
-;           rts
+; Puts the result in HEAP
+DIVIDE32_DIVIDEND    = HEAP         ; 32 bit numerator
+DIVIDE32_DIVISOR     = HEAP+4       ; 16 bit divisor
+DIVIDE32_REM         = HEAP+8       ; 32 bit remainder 
+DIVIDE32_SAVE        = HEAP+20      ; temp area
+
+DIVIDE32:
+            LDA #0              ;Initialize REM to 0
+            STA DIVIDE32_REM
+            STA DIVIDE32_REM+1
+            STA DIVIDE32_REM+2
+            STA DIVIDE32_REM+3
+
+            LDX #32             ;There are 32 bits 
+
+@DIVIDE32_LOOP:
+            ASL DIVIDE32_DIVIDEND       ;Shift hi bit of numerator into remainder
+            ROL DIVIDE32_DIVIDEND+1     ;(vacating the lo bit, which will be used for the quotient)
+            ROL DIVIDE32_DIVIDEND+2     
+            ROL DIVIDE32_DIVIDEND+3     
+            ROL DIVIDE32_REM
+            ROL DIVIDE32_REM+1
+            ROL DIVIDE32_REM+2
+            ROL DIVIDE32_REM+3
+            LDA DIVIDE32_REM
+            SEC                 ;Trial subtraction
+            SBC DIVIDE32_DIVISOR
+            STA DIVIDE32_SAVE
+            LDA DIVIDE32_REM+1
+            SBC DIVIDE32_DIVISOR+1
+            STA DIVIDE32_SAVE+1
+            LDA DIVIDE32_REM+2
+            SBC DIVIDE32_DIVISOR+2
+            STA DIVIDE32_SAVE+2
+            LDA DIVIDE32_REM+3
+            SBC DIVIDE32_DIVISOR+3
+            STA DIVIDE32_SAVE+3
+            BCC @subfail    ; Did subtraction succeed?
+            LDA DIVIDE32_SAVE
+            STA DIVIDE32_REM
+            LDA DIVIDE32_SAVE+1
+            STA DIVIDE32_REM+1
+            LDA DIVIDE32_SAVE+2
+            STA DIVIDE32_REM+2
+            LDA DIVIDE32_SAVE+3
+            STA DIVIDE32_REM+3
+            CLC
+            INC DIVIDE32_DIVIDEND   ; and record a 1 in the quotient
+@subfail:
+            DEX
+            BNE @DIVIDE32_LOOP
+            RTS
