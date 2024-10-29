@@ -2,12 +2,9 @@
 .debuginfo
 .segment  "ROM"
 
-READ_PTR      = $00
-WRITE_PTR     = $01
 
-INPUT_BUFFER = $0300
 
-ACIA        = $5000
+
 ACIA_DATA   = ACIA
 ACIA_STATUS = (ACIA+1)
 ACIA_CMD    = (ACIA+2)
@@ -27,7 +24,7 @@ MONRDKEY:   jsr BUF_SIZE
             beq @no_key
             phx
             ldx READ_PTR
-            lda INPUT_BUFFER, x
+            lda INPUT_BUFFR, x
             inc READ_PTR
             pha
             jsr BUF_SIZE
@@ -62,7 +59,7 @@ IRQ:        pha
             lda ACIA_STATUS           ; assume ACIA is only interrupt
             lda ACIA_DATA
 WRITE_BUF:  ldx WRITE_PTR
-            sta INPUT_BUFFER, x
+            sta INPUT_BUFFR, x
             inc WRITE_PTR
             jsr BUF_SIZE
             cmp #$F0

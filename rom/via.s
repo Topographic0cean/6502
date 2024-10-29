@@ -11,10 +11,6 @@
 
 .segment    "ROM"
 
-PORT    = $01       ; keep track of what PORTA should be.  Since it is used by different
-                    ; functions.  We do not expect them to know what each is doing.
-
-LCD     = $6000
 PORTB   = LCD
 PORTA   = (LCD+1)
 DDRB    = (LCD+2)
@@ -114,12 +110,13 @@ VIA_CTS:
 @turn_on_cts:   lda PORT
                 ora #%00000001
                 jmp cts_done
+
 DISPLAY_LEDS:   tay  
                 lda PORT
-                and #00000001           ; clear all but CTS
+                and #%00000001           ; clear all but CTS
                 sta PORT
                 tya 
-                and #11111000           ; only the top 5 bits count
+                and #%11111000           ; only the top 5 bits count
                 ora PORT
 cts_done:
                 sta PORT

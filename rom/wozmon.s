@@ -2,17 +2,7 @@
 .debuginfo
 .segment    "WOZMON"
 
-XAML = $24                            ; last opened location low
-XAMH = $25                            ; last opened location high
-STL  = $26                            ; store address low
-STH  = $27                            ; store address high
-L    = $28                            ; Hex value parsing Low
-H    = $29                            ; Hex value parsing High
-YSAV = $2A                            ; Used to see if hex value is given
-MODE = $2b                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
-
-INPUTBUF   = $0200
-HEAP       = $0400
+.include "mem.s"
 
 RESET:      cld
             jsr ACIA_SETUP

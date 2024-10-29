@@ -6,7 +6,7 @@
 ; 
 ; Also, make sure we have some blinking lights so we
 ; look more professional.   Assumes that LEDs are attached
-; the the lower 5 bits of the 65C22 port A.
+; the the upper 5 bits of the 65C22 port A.
 ;
 .setcpu   "65C02"
 .debuginfo
@@ -17,7 +17,6 @@ DECIMAL   = HEAP+12
 PSTARTLO = $2800        ; 4,000,000,000
 PSTARTHI = $EE6B        
 
-LED         = $40 ; Make blinky lights
 COUNT       = $41 ; Only display result every 256 computations
 PI          = $50 ; Each of thse vars are 4 bytes
 
@@ -29,8 +28,6 @@ DIVISOR     = HEAP+4
 .org START
             lda #$FF
             sta COUNT
-            lda #$00
-            sta LED
             lda #$01
             sta N
             lda #$00
@@ -48,11 +45,11 @@ DIVISOR     = HEAP+4
             jsr DISPLAY_CLEAR
 
 pi_loop:    inc COUNT
+            lda COUNT
+            and #$7F
             bne @no_display
-            ;lda LED           ; blink some lights
-            ;and #%00011111    ; top 3 bits are for LCD
-            ;jsr DISPLAY_PORT
-            ;inc LED
+            lda PI            ; blink some lights
+            jsr DISPLAY_LEDS
             jsr display_pi
             
 @no_display:
