@@ -105,18 +105,25 @@ DISPRINT:
                 rts
 
                 ; Set CTS to the value of bit 0 in the accumulator
-VIA_CTS:        pha
+VIA_CTS:       
                 bit #$01
                 bne @turn_on_cts
                 lda PORT
                 and #%11111110
-                jmp @cts_done
+                jmp cts_done
 @turn_on_cts:   lda PORT
                 ora #%00000001
-@cts_done:
+                jmp cts_done
+DISPLAY_LEDS:   tay  
+                lda PORT
+                and #00000001           ; clear all but CTS
+                sta PORT
+                tya 
+                and #11111000           ; only the top 5 bits count
+                ora PORT
+cts_done:
                 sta PORT
                 sta PORTA
-                pla
                 rts
 
 lcd_wait:       pha 

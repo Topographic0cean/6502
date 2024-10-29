@@ -25,8 +25,6 @@ PI          = $42           ; Holds current PI value
 
 N           = $4A           ; Hold the current starting multiplier
 
-ADD         = $7A           ; even if we should add term
-
 MULTC       = HEAP    ; multiplicand
 MULTP       = HEAP+4  ; multiplier
 RESULT      = HEAP+8  ; result of multiplication
@@ -37,7 +35,7 @@ DIVISOR     = HEAP+4
 DECIMAL     = HEAP+12 
 
 .org START
-            lda #$FF
+            lda #$FE
             sta COUNT
             lda #$00
             sta LED
@@ -59,12 +57,12 @@ DECIMAL     = HEAP+12
             
             jsr DISPLAY_CLEAR
 
-pi_loop:    inc COUNT
+pi_loop:    dec COUNT
             bne @no_led
-            lda LED           ; blink some lights
-            and #%00011111    ; top 3 bits are for control
+            ;lda LED           ; blink some lights
+            ;and #%00011111    ; top 3 bits are for control
             ;jsr DISPLAY_PORT
-            inc LED
+            ;inc LED
 @no_led:
             ; First thing is to caclulate the denominator of the next
             ; term.  This will start with 2*3*4 then next term is
@@ -89,28 +87,18 @@ pi_loop:    inc COUNT
             sta DIVIDEND+2
             lda #>FOURHI
             sta DIVIDEND+3 
+
             jsr DIVIDE32
+
+            ;jsr display_dividend 
 
             ; finally, add to PI if ADD is even,
             ; otherwise subtract
-            lda ADD
+            lda COUNT
             and #$01
             beq even
-
-            sec				    ; set carry for borrow
-            lda PI
-            sbc DIVIDEND			; perform subtraction on the LSBs
-            sta PI
-            lda PI+1			; do the same for the MSBs, with carry
-            sbc DIVIDEND+1			; set according to the previous result
-            sta PI+1
-            lda PI+2			; do the same for the MSBs, with carry
-            sbc DIVIDEND+2			; set according to the previous result
-            sta PI+2
-            lda PI+3			; do the same for the MSBs, with carry
-            sbc DIVIDEND+3			; set according to the previous result
-            sta PI+3
-even:
+odd:        ; count is odd so add this term
+            clc
             lda PI
             adc DIVIDEND
             sta PI
@@ -123,19 +111,35 @@ even:
             lda PI+3
             adc DIVIDEND+3
             sta PI+3
+            jmp display_value
+even:       ; count is even so subtract this term
+            sec				    ; set carry for borrow
+            lda PI
+            sbc DIVIDEND		; perform subtraction on the LSBs
+            sta PI
+            lda PI+1			; do the same for the MSBs, with carry
+            sbc DIVIDEND+1		; set according to the previous result
+            sta PI+1
+            lda PI+2			; do the same for the MSBs, with carry
+            sbc DIVIDEND+2		; set according to the previous result
+            sta PI+2
+            lda PI+3			; do the same for the MSBs, with carry
+            sbc DIVIDEND+3		; set according to the previous result
+            sta PI+3
 
 display_value:
-            inc ADD
             jsr display_pi
-
+            jsr ONE_SEC_DELAY
+            lda COUNT
+            beq @stop
             lda N
-            bne back_to_loop
+            bne @back_to_loop
             inc N+1
-            beq stop
-back_to_loop:
+            beq @stop
+@back_to_loop:
             jmp pi_loop
-stop:
-            jmp stop
+@stop:
+            jmp @stop
 
 store_multp:
             lda N
@@ -158,7 +162,6 @@ store_multc:
             lda N+3
             sta MULTC+3
             rts
-
 
 inc_n:     
             inc N
@@ -254,19 +257,3 @@ display_num:
             jmp @output
 @done:
             rts
-
-delay:
-            ldy #$20
-@loop_x:    
-            ldx #$FF
-@loop_a:
-            lda #$FF
-@delay_loop:
-            sbc #$01
-            bne @delay_loop
-            dex 
-            bne @loop_a
-            dey 
-            bne @loop_x
-            rts
-           

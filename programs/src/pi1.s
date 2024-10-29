@@ -1,5 +1,6 @@
 ; 
 ; Computes PI using pi/4 = arctan(1) as Taylor series.
+;    pi = 4 - 4/3 + 4/5 - 4/7 + ...
 ; This is not the most efficient computation, but it 
 ; seems to slowly get there.
 ; 
@@ -19,19 +20,20 @@ PSTARTHI = $EE6B
 LED         = $40 ; Make blinky lights
 COUNT       = $41 ; Only display result every 256 computations
 PI          = $50 ; Each of thse vars are 4 bytes
-N           = $58
-TERM        = $60
-DIV         = $70
-REM         = $78
-SUBSAVE     = $80
-TDIV        = $90
+
+N           = $58 ; starts at 2 and increments by 2
+
+DIVIDEND    = HEAP         
+DIVISOR     = HEAP+4  
 
 .org START
             lda #$FF
             sta COUNT
             lda #$00
             sta LED
+            lda #$01
             sta N
+            lda #$00
             sta N+1
             sta N+2
             sta N+3
@@ -47,10 +49,80 @@ TDIV        = $90
 
 pi_loop:    inc COUNT
             bne @no_display
-            lda LED           ; blink some lights
-            and #%00011111    ; top 3 bits are for LCD
+            ;lda LED           ; blink some lights
+            ;and #%00011111    ; top 3 bits are for LCD
             ;jsr DISPLAY_PORT
-            inc LED
+            ;inc LED
+            jsr display_pi
+            
+@no_display:
+            ;jsr display_n
+            jsr inc_n
+            jsr inc_n
+
+            jsr load_dividend
+            jsr load_divisor
+            jsr DIVIDE32
+
+            ;jsr display_num
+
+            lda COUNT
+            and #$01
+            bne @add
+
+@subtract: 
+            sec
+            lda PI
+            sbc DIVIDEND
+            sta PI
+            lda PI+1
+            sbc DIVIDEND+1
+            sta PI+1
+            lda PI+2
+            sbc DIVIDEND+2
+            sta PI+2
+            lda PI+3
+            sbc DIVIDEND+3
+            sta PI+3
+            jmp @done
+@add:
+            clc
+            lda PI
+            adc DIVIDEND
+            sta PI
+            lda PI+1
+            adc DIVIDEND+1
+            sta PI+1
+            lda PI+2
+            adc DIVIDEND+2
+            sta PI+2
+            lda PI+3
+            adc DIVIDEND+3
+            sta PI+3
+
+@done:
+            lda DIVIDEND
+            ora DIVIDEND+1
+            ora DIVIDEND+2
+            ora DIVIDEND+3
+            beq @stop
+            jmp pi_loop
+@stop:
+            jmp @stop
+
+display_n:
+            lda N
+            sta HEAP
+            lda N+1 
+            sta HEAP+1
+            lda N+2
+            sta HEAP+2
+            lda N+3 
+            sta HEAP+3
+            jsr display_num
+            rts
+
+display_pi:
             lda PI
             sta HEAP
             lda PI+1 
@@ -60,8 +132,46 @@ pi_loop:    inc COUNT
             lda PI+3 
             sta HEAP+3
             jsr display_num
-            
-@no_display: ; increment N
+            rts
+
+display_num:
+            jsr DISPLAY_HOME
+            jsr HEXTODEC
+            ldy #$00
+@output:
+            lda DECIMAL, y
+            beq @done
+            jsr DISPLAY_PUTC
+            iny
+            jmp @output
+@done:
+            rts
+
+
+
+load_divisor:
+            lda N
+            sta DIVISOR
+            lda N+1
+            sta DIVISOR+1
+            lda N+2
+            sta DIVISOR+2
+            lda N+3
+            sta DIVISOR+3
+            rts
+
+load_dividend:
+            lda #<PSTARTLO
+            sta DIVIDEND
+            lda #>PSTARTLO
+            sta DIVIDEND+1
+            lda #<PSTARTHI
+            sta DIVIDEND+2
+            lda #>PSTARTHI
+            sta DIVIDEND+3
+            rts
+
+inc_n:
             inc N
             bne @n_done
             inc N + 1
@@ -69,122 +179,5 @@ pi_loop:    inc COUNT
             inc N + 2
             bne @n_done
             inc N + 3
-
-@n_done:    ; TDIV is 2*N+1
-            lda N
-            clc
-            adc N
-            sta TDIV
-            lda N+1
-            adc N+1
-            sta TDIV+1
-            lda N+2
-            adc N+2
-            sta TDIV+2
-            lda N+3
-            adc N+3
-            sta TDIV+3
-            inc TDIV
-            bne @tdiv_done
-            inc TDIV+1
-            bne @tdiv_done
-            inc TDIV+2
-            bne @tdiv_done
-            inc TDIV+3
-@tdiv_done:
-            ; term is PSTART / TDIV
-            lda #<PSTARTLO
-            sta TERM
-            lda #>PSTARTLO
-            sta TERM+1
-            lda #<PSTARTHI
-            sta TERM+2
-            lda #>PSTARTHI
-            sta TERM+3
-            LDA #0      ;Initialize REM to 0
-            STA REM
-            STA REM+1
-            STA REM+2
-            STA REM+3
-            LDX #32     ;There are 32 bits 
-L1:         ASL TERM    ;Shift hi bit of TERM into REM
-            ROL TERM+1  ;(vacating the lo bit, which will be used for the quotient)
-            ROL TERM+2  ;(vacating the lo bit, which will be used for the quotient)
-            ROL TERM+3  ;(vacating the lo bit, which will be used for the quotient)
-            ROL REM
-            ROL REM+1
-            ROL REM+2
-            ROL REM+3
-            LDA REM
-            SEC         ;Trial subtraction
-            SBC TDIV
-            STA SUBSAVE
-            LDA REM+1
-            SBC TDIV+1
-            STA SUBSAVE+1
-            LDA REM+2
-            SBC TDIV+2
-            STA SUBSAVE+2
-            LDA REM+3
-            SBC TDIV+3
-            BCC SUBFAIL   ;Did subtraction succeed?
-            STA REM+3     ;If yes, save it
-            lda SUBSAVE
-            sta REM
-            lda SUBSAVE+1
-            sta REM+1
-            lda SUBSAVE+2
-            sta REM+2
-            INC TERM    ;and record a 1 in the quotient
-      SUBFAIL:
-            DEX
-            BNE L1
-
-            ; if N is even then add PI + TERM otherwise subtract
-            lda N 
-            and #$01
-            beq @even
-            ; odd
-            sec				; set carry for borrow purpose
-            lda PI
-            sbc TERM			; perform subtraction on the LSBs
-            sta PI
-            lda PI+1			; do the same for the MSBs, with carry
-            sbc TERM+1			; set according to the previous result
-            sta PI+1
-            lda PI+2			; do the same for the MSBs, with carry
-            sbc TERM+2			; set according to the previous result
-            sta PI+2
-            lda PI+3			; do the same for the MSBs, with carry
-            sbc TERM+3			; set according to the previous result
-            sta PI+3
-            jmp pi_loop
-
-      @even:
-            clc
-            lda PI
-            adc TERM
-            sta PI
-            lda PI+1
-            adc TERM+1
-            sta PI+1
-            lda PI+2
-            adc TERM+2
-            sta PI+2
-            lda PI+3
-            adc TERM+3
-            sta PI+3
-            jmp pi_loop
-
-      display_num:
-            jsr DISPLAY_HOME
-            jsr HEXTODEC
-            ldy #$00
-      @output:
-            lda DECIMAL, y
-            beq @done
-            jsr DISPLAY_PUTC
-            iny
-            jmp @output
-      @done:
+@n_done:
             rts
