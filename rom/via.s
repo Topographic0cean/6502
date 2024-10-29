@@ -11,7 +11,7 @@
 
 .segment    "ROM"
 
-PORT    = $02       ; keep track of what PORTA should be.  Since it is used by different
+PORT    = $01       ; keep track of what PORTA should be.  Since it is used by different
                     ; functions.  We do not expect them to know what each is doing.
 
 LCD     = $6000

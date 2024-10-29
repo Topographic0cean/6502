@@ -2,6 +2,7 @@
 entrypoints="\
     DISPLAY_CLEAR \
     DISPLAY_HOME \
+    DISPLAY_LEDS \
     DISPLAY_PUTC \
     DIVIDE32 \
     HEXTODEC \

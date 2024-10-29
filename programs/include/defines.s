@@ -18,6 +18,7 @@ STORAGE             = $0500     ; $0500 - $1FFF General storage area for RAM pro
 START               = $2000     ; Good place to put the RAM program
 DISPLAY_CLEAR  	= $00A183
 DISPLAY_HOME  	= $00A189
+DISPLAY_LEDS  	= $00A1D4
 DISPLAY_PUTC  	= $00A18F
 DIVIDE32  	= $00A358
 HEXTODEC  	= $00A238
