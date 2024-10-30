@@ -25,3 +25,19 @@ ONE_SEC_DELAY:
             ply
             plx
             rts
+
+; Delay for one milisecond approximately
+ONE_M_DELAY:
+            phy
+            pha
+            ldy #$4D
+@delay_m_a:
+            lda #$FF
+@loop_m_a:
+            sbc #$01
+            bne @loop_m_a
+            dey
+            bne @delay_m_a
+            pla
+            ply
+            rts

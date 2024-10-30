@@ -8,9 +8,7 @@
 .include "../../rom/include/defines.s"
 
 DECIMAL   = HEAP+12 
-COUNT     = $1000 ; 2 bytes
-PCR       = $600C
-IER       = $600E
+COUNT     = $04 ; 4 bytes
 
 .org START
             lda #$00
@@ -42,7 +40,7 @@ clock_loop: jsr MONRDKEY
             jsr HEXTODEC
 
             ldx #$00
-@output: lda DECIMAL, x
+@output:    lda DECIMAL, x
             beq clock_loop
             jsr DISPLAY_PUTC
             inx

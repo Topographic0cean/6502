@@ -17,10 +17,9 @@ DECIMAL   = HEAP+12
 PSTARTLO = $2800        ; 4,000,000,000
 PSTARTHI = $EE6B        
 
-COUNT       = $41 ; Only display result every 256 computations
-PI          = $50 ; Each of thse vars are 4 bytes
-
-N           = $58 ; starts at 2 and increments by 2
+COUNT       = $04 ; Only display result every 256 computations
+PI          = $08 ; Each of thse vars are 4 bytes
+N           = $0C ; starts at 2 and increments by 2
 
 DIVIDEND    = HEAP         
 DIVISOR     = HEAP+4  

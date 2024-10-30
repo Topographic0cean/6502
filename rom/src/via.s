@@ -8,7 +8,6 @@
 ;       bit 0       CTS
 ;       bits 1-7    LED blinkenlights
 ;
-
 .segment    "ROM"
 
 PORTB   = LCD
@@ -48,6 +47,7 @@ VIA_SETUP:
 
 
 DISPLAY_INIT:
+                jsr ONE_M_DELAY
                 lda #%00000011 ; Set 8-bit mode
                 sta PORTB
                 ora #E
@@ -55,6 +55,7 @@ DISPLAY_INIT:
                 and #%00001111
                 sta PORTB
 
+                jsr ONE_M_DELAY
                 lda #%00000011 ; Set 8-bit mode
                 sta PORTB
                 ora #E
@@ -62,15 +63,15 @@ DISPLAY_INIT:
                 and #%00001111
                 sta PORTB
 
+                jsr ONE_M_DELAY
                 lda #%00000011 ; Set 8-bit mode
                 sta PORTB
                 ora #E
                 sta PORTB
                 and #%00001111
                 sta PORTB
-skip:
-                ; Okay, now we're really in 8-bit mode.
-                ; Command to get to 4-bit mode ought to work now
+
+                jsr ONE_M_DELAY
                 lda #%00000010 ; Set 4-bit mode
                 sta PORTB
                 ora #E

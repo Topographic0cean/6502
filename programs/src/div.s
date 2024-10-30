@@ -8,8 +8,8 @@ REM         = HEAP+8       ; 32 bit remainder
 
 DECIMAL     = HEAP+12 
 
-SAVE_REM    = $10
-SAVE_QUOTE  = $14
+SAVE_REM    = $04
+SAVE_QUOTE  = $08
 
 .org START
             jsr DISPLAY_CLEAR
