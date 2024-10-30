@@ -33,22 +33,10 @@ VIA_SETUP:
                 sta PORT
                 sta PORTA
 
-                ; Initialize LCD to 4 bit 2 line mode
-                lda #%00000010  ; 4-bit mode 
-                sta PORTB
-                ora #E 
-                sta PORTB
-                and #%00001111
-                sta PORTB 
-                lda #%00101000 ; Set 4-bit mode; 2-line display; 5x8 font
-                jsr lcd_send
-                lda #%00001110  ; display on; cursor on; blink off
-                jsr lcd_send
-                lda #%00000110  ; inc and shift cursor; no display shift
-                jsr lcd_send
+                jsr DISPLAY_INIT
 
-                ; Display READY
                 jsr DISPLAY_CLEAR
+
                 ldy #00
 @start_message: lda ready, y
                 beq @end_message
@@ -58,6 +46,44 @@ VIA_SETUP:
 @end_message:
                 rts
 
+
+DISPLAY_INIT:
+                lda #%00000011 ; Set 8-bit mode
+                sta PORTB
+                ora #E
+                sta PORTB
+                and #%00001111
+                sta PORTB
+
+                lda #%00000011 ; Set 8-bit mode
+                sta PORTB
+                ora #E
+                sta PORTB
+                and #%00001111
+                sta PORTB
+
+                lda #%00000011 ; Set 8-bit mode
+                sta PORTB
+                ora #E
+                sta PORTB
+                and #%00001111
+                sta PORTB
+skip:
+                ; Okay, now we're really in 8-bit mode.
+                ; Command to get to 4-bit mode ought to work now
+                lda #%00000010 ; Set 4-bit mode
+                sta PORTB
+                ora #E
+                sta PORTB
+                and #%00001111
+                sta PORTB
+                lda #%00101000 ; Set 4-bit mode; 2-line display; 5x8 font
+                jsr lcd_send
+                lda #%00001110  ; display on; cursor on; blink off
+                jsr lcd_send
+                lda #%00000110  ; inc and shift cursor; no display shift
+                jsr lcd_send
+                rts
 
 DISPLAY_CLEAR:  
                 lda #%00000001
