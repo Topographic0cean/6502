@@ -10,7 +10,7 @@
 ;
 .setcpu   "65C02"
 .debuginfo
-.include "../include/defines.s"
+.include "../../rom/include/defines.s"
 
 PSTARTLO    = $5E00         ; 3,000,000,000
 PSTARTHI    = $B2D0

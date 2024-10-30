@@ -1,7 +1,7 @@
 
 .setcpu   "65C02"
 .debuginfo
-.include "../include/defines.s"
+.include "../../rom/include/defines.s"
 
 N           = $32           ; Hold the current starting multiplier
 

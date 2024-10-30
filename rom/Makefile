@@ -1,5 +1,4 @@
-ASM := $(wildcard *.s)
-LIB := $(wildcard lib/*.s)
+ASM := $(wildcard src/*.s)
 MSB := $(wilcard msbasic/*.s)
 
 .DEFAULT_GOAL = all
@@ -7,8 +6,9 @@ MSB := $(wilcard msbasic/*.s)
 .PHONY: all clean
 all: rom.bin
 
-rom.bin: $(ASM) $(LIB) $(MSB)
+rom.bin: $(ASM) $(MSB)
 	make -C msbasic
+	@./update_defines
 
 clean:
 	$(RM) *.o */*.o *.bin bin/* *.list */*.list */*.lbl 

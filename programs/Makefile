@@ -1,6 +1,5 @@
 
 all: 
-	./update_defines
 	make -C src
 
 clean:

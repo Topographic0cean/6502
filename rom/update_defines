@@ -12,8 +12,6 @@ entrypoints="\
     VIA_CTS \
 "
 
-cp include/defines.s include/defines.old
-
 > include/defines.s cat <<"EOF"
 ; RAM address space
 

@@ -1,6 +1,6 @@
 .setcpu   "65C02"
 .debuginfo
-.include "../include/defines.s"
+.include "../../rom/include/defines.s"
 
 DIVIDEND    = HEAP         ; 32 bit numerator
 DIVISOR     = HEAP+4       ; 16 bit divisor

@@ -10,7 +10,7 @@
 ;
 .setcpu   "65C02"
 .debuginfo
-.include "../include/defines.s"
+.include "../../rom/include/defines.s"
 
 DECIMAL   = HEAP+12 
 
