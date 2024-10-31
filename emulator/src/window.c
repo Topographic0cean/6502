@@ -1,4 +1,5 @@
 #include <ncurses.h>
+#include <stdint.h>
 
 #include "window.h"
 #include "ram.h"

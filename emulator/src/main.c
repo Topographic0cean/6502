@@ -18,7 +18,18 @@
 Options *options;
 Control *controls;
 
-void initialize(int argc, const     char* argv[])
+extern uint16_t pc;
+extern uint8_t sp, a, x, y, status;
+
+void check_instruction()
+{
+    if (status & FLAG_BREAK) {
+        status &= ~FLAG_BREAK;
+        controls->pause = 1;
+    }
+}
+
+void initialize(int argc, const char *argv[])
 {
     options = process_options(argc, argv);
     controls = control_init(options);
@@ -28,10 +39,12 @@ void initialize(int argc, const     char* argv[])
     w65c22_init();
     acia_init();
     display_init();
+    hookexternal(check_instruction);
     reset6502();
 }
 
-void shutdown() {
+void shutdown()
+{
     window_shutdown();
     logger_close();
 }
@@ -41,7 +54,7 @@ int main(int argc, const char *argv[])
     struct timespec asleep;
     struct timespec mssleep;
 
-    initialize(argc,argv);
+    initialize(argc, argv);
 
     mssleep.tv_sec = 0;
     mssleep.tv_nsec = 100000000;
@@ -53,7 +66,7 @@ int main(int argc, const char *argv[])
     {
         if (controls->reset == 1)
         {
-            logger_log(LOGGER_IO,"===== reset ===== \n");
+            logger_log(LOGGER_IO, "===== reset ===== \n");
             reset6502();
             controls->reset = 0;
         }
@@ -71,17 +84,20 @@ int main(int argc, const char *argv[])
         {
             break;
         }
-        if (controls->go) {
+        if (controls->go)
+        {
             controls->pause = 0;
             controls->go = 0;
         }
-        if (controls->pause == 0 || controls->step) {
+        if (controls->pause == 0 || controls->step)
+        {
             step6502();
             w65c22_tick();
             nanosleep(&asleep, NULL);
             controls->step = 0;
         }
-        else {
+        else
+        {
             window_show_state();
             nanosleep(&mssleep, NULL);
         }

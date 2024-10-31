@@ -11,7 +11,7 @@ PSTARTHI = $EE6B
 POS       = $04 ; Current base prime we are looking at
 END       = $08 ; Last bit position we will consider
 MARK      = $0C ; Current position to mark as not prime
-PRIMES    = $0F
+PRIMES    = $10
 
 .org START
                 jsr DISPLAY_CLEAR
@@ -35,8 +35,8 @@ loop:
                 jsr move_to_next_prime
                 jsr five_secs
                 lda POS
-                cmp #$08
-                bne loop
+                cmp END
+                ;bne loop
 stop:
                 jmp stop
 
@@ -64,23 +64,29 @@ mark_non_primes:
                 ; set the bit in A
                 lda POS
                 sta MARK
-@mark_non_primes_loop
+mark_non_primes_loop:
                 jsr set_bit
                 ora PRIMES
                 sta PRIMES
                 lda MARK
                 cmp END
-                bne @mark_non_primes_loop
+                beq @mark_non_primes_done
+                clc
+                adc #$03
+                sta MARK
+                jmp mark_non_primes_loop
+@mark_non_primes_done:
                 rts
 
 set_bit:
-                lda #80
-                tax
+                brk 0
                 lda MARK
+                tax
+                lda #80
 set_bit_loop:
-                beq @set_bit_done
                 asl 
                 dex
+                beq @set_bit_done
                 jmp set_bit_loop
 @set_bit_done:
                 rts
@@ -93,7 +99,7 @@ move_to_next_prime:
                 jsr set_bit
                 and PRIMES
                 bne move_to_next_prime
-@move_to_next_prime_done
+@move_to_next_prime_done:
                 rts
                 
 five_secs:

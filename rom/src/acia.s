@@ -54,7 +54,8 @@ BUF_SIZE:   lda WRITE_PTR
             sbc READ_PTR
             rts
 
-IRQ:        pha
+ACIA_READ:
+            pha
             phx
             lda ACIA_STATUS           ; assume ACIA is only interrupt
             lda ACIA_DATA
@@ -68,4 +69,4 @@ WRITE_BUF:  ldx WRITE_PTR
             jsr VIA_CTS
 @NOT_FULL:  plx
             pla
-            rti
+            rts
