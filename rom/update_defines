@@ -4,6 +4,7 @@ entrypoints="\
     DISPLAY_HOME \
     DISPLAY_INIT \
     DISPLAY_LEDS \
+    DISPLAY_NUM \
     DISPLAY_PUTC \
     DIVIDE32 \
     HEXTODEC \

@@ -100,3 +100,17 @@ hextodec_push:
   ply
   plx
   rts
+
+
+DISPLAY_NUM:
+            jsr DISPLAY_HOME
+            jsr HEXTODEC
+            ldy #$00
+@output:
+            lda DECSTR, y
+            beq @done
+            jsr DISPLAY_PUTC
+            iny
+            jmp @output
+@done:
+            rts
