@@ -8,12 +8,25 @@
 PSTARTLO = $2800        ; 4,000,000,000
 PSTARTHI = $EE6B        
 
-POS       = $04 ; Current base prime we are looking at
-END       = $08 ; Last bit position we will consider
-MARK      = $0C ; Current position to mark as not prime
-PRIMES    = $10
+POS         = $04 ; Current base prime we are looking at
+END         = $08 ; Last bit position we will consider
+MARK        = $0C ; Current position to mark as not prime
+PRIMES      = $10
+MASK        = $14
+ADDER       = $18
 
 .org START
+                lda #$08
+                sta END
+                lda #$00
+                sta POS
+                sta PRIMES
+
+         ;      lda #$49
+         ;      sta PRIMES
+         ;      jsr move_to_next_prime
+
+
                 jsr DISPLAY_CLEAR
                 lda #$02
                 sta HEAP
@@ -24,11 +37,6 @@ PRIMES    = $10
                 jsr DISPLAY_NUM
                 jsr five_secs
 
-                lda #$08
-                sta END
-                lda #$00
-                sta POS
-                sta PRIMES
 loop:
                 jsr print_prime
                 jsr mark_non_primes
@@ -36,7 +44,7 @@ loop:
                 jsr five_secs
                 lda POS
                 cmp END
-                ;bne loop
+                bne loop
 stop:
                 jmp stop
 
@@ -64,40 +72,45 @@ mark_non_primes:
                 ; set the bit in A
                 lda POS
                 sta MARK
+                jsr get_num
+                sta ADDER
 mark_non_primes_loop:
                 jsr set_bit
+                lda MASK
                 ora PRIMES
                 sta PRIMES
                 lda MARK
-                cmp END
-                beq @mark_non_primes_done
                 clc
-                adc #$03
+                adc ADDER
+                cmp END
+                bmi @mark_not_done
+                rts
+@mark_not_done:
                 sta MARK
                 jmp mark_non_primes_loop
-@mark_non_primes_done:
-                rts
 
 set_bit:
-                brk 0
-                lda MARK
                 tax
-                lda #80
+                clc
+                lda #$01
+                sta MASK
 set_bit_loop:
-                asl 
+                txa
+                beq @set_bit_done 
                 dex
-                beq @set_bit_done
+                rol MASK 
                 jmp set_bit_loop
 @set_bit_done:
                 rts
 
 move_to_next_prime:
                 inc POS
+                lda POS
                 cmp END
                 beq @move_to_next_prime_done
-                sta MARK
                 jsr set_bit
-                and PRIMES
+                lda MASK
+                bit PRIMES
                 bne move_to_next_prime
 @move_to_next_prime_done:
                 rts
