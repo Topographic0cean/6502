@@ -39,6 +39,7 @@ ADDER       = $18
 
 loop:
                 jsr print_prime
+                brk 0
                 jsr mark_non_primes
                 jsr move_to_next_prime
                 jsr five_secs
@@ -73,8 +74,12 @@ mark_non_primes:
                 lda POS
                 sta MARK
                 jsr get_num
-                sta ADDER
+                cmp #$08
+                bmi mark_non_primes_loop
+                rts
 mark_non_primes_loop:
+                sta ADDER
+                lda MARK
                 jsr set_bit
                 lda MASK
                 ora PRIMES
