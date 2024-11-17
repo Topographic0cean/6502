@@ -8,7 +8,7 @@
 PSTARTLO = $2800        ; 4,000,000,000
 PSTARTHI = $EE6B        
 
-POS         = $04 ; Current base prime we are looking at
+POS         = $04 ; bit number of the current prime
 END         = $08 ; Last bit position we will consider
 MARK        = $0C ; Current position to mark as not prime
 PRIMES      = $10
@@ -16,16 +16,17 @@ MASK        = $14
 ADDER       = $18
 
 .org START
-                lda #$08
+                lda #$20
                 sta END
                 lda #$00
                 sta POS
+                sta POS+1
+                sta POS+2
+                sta POS+3
                 sta PRIMES
-
-         ;      lda #$49
-         ;      sta PRIMES
-         ;      jsr move_to_next_prime
-
+                sta PRIMES+1
+                sta PRIMES+2
+                sta PRIMES+3
 
                 jsr DISPLAY_CLEAR
                 lda #$02
@@ -39,7 +40,6 @@ ADDER       = $18
 
 loop:
                 jsr print_prime
-                brk 0
                 jsr mark_non_primes
                 jsr move_to_next_prime
                 jsr five_secs
@@ -74,7 +74,7 @@ mark_non_primes:
                 lda POS
                 sta MARK
                 jsr get_num
-                cmp #$08
+                cmp #$40
                 bmi mark_non_primes_loop
                 rts
 mark_non_primes_loop:
@@ -84,6 +84,15 @@ mark_non_primes_loop:
                 lda MASK
                 ora PRIMES
                 sta PRIMES
+                lda MASK+1
+                ora PRIMES+1
+                sta PRIMES+1
+                lda MASK+2
+                ora PRIMES+2
+                sta PRIMES+2
+                lda MASK+3
+                ora PRIMES+3
+                sta PRIMES+3
                 lda MARK
                 clc
                 adc ADDER
@@ -99,6 +108,7 @@ set_bit:
                 clc
                 lda #$01
                 sta MASK
+                lda #$00
 set_bit_loop:
                 txa
                 beq @set_bit_done 
