@@ -8,6 +8,7 @@ static Options options;
 struct poptOption optionsTable[] = {
     {"clocks", 'c', POPT_ARG_INT, 0, 'c', "Number of clocks to run", "clocks"},
     {"core", 'e', POPT_ARG_NONE, 0, 'e', "Dump core at end.", NULL},
+    {"keys", 'k', POPT_ARG_NONE, 0, 'k', "Print control characters.", NULL},
     {"load", 'l', POPT_ARG_STRING, 0, 'l', "Load prog file", NULL},
     {"paused", 'p', POPT_ARG_NONE, 0, 'p', "Paused at start", NULL},
     {"rom", 'r', POPT_ARG_STRING, 0, 'r', "ROM file to load", "file"},
@@ -19,6 +20,7 @@ Options* process_options(int argc, const char **argv)
 {
     int c;
 
+    options.keys = 0;
     options.load = "";
     options.paused = 0;
     options.rom = "rom/rom.bin";
@@ -32,6 +34,9 @@ Options* process_options(int argc, const char **argv)
     {
         switch (c)
         {
+        case 'k':
+            options.keys = 1;
+            break;
         case 'l':
             options.load = poptGetOptArg(optCon);
             break;

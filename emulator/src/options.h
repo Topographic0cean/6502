@@ -2,6 +2,7 @@
 
 typedef struct options
 {
+    int keys;
     int paused;
     char *rom;
     char *load;

@@ -32,6 +32,17 @@ void check_instruction()
 void initialize(int argc, const char *argv[])
 {
     options = process_options(argc, argv);
+    if (options->keys) {
+        printf("keyboard controls:  \n");
+        printf("\tctl-b    Scroll backward in memory,\n");
+        printf("\tctl-f    Scroll forward in memory,\n");
+        printf("\tctl-g    Continue program,\n");
+        printf("\tctl-n    Step one instruction,\n");
+        printf("\tctl-p    Pause program,\n");
+        printf("\tctl-r    Reset 6502,\n");
+        printf("\tctl-x    Exit emulator.\n");
+        exit(0);
+    }        
     controls = control_init(options);
     logger_init(options->verbose);
     window_init();

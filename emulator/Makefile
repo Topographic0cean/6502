@@ -1,4 +1,4 @@
-EXE = emulate6502
+EXE = 6502emulator
 
 CC = gcc
 LD = gcc

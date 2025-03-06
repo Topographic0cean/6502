@@ -1,12 +1,15 @@
 ; 
 ; Uses the Sieve of Eratosthenes to print out primes.
 ; 
+; 
 .setcpu   "65C02"
 .debuginfo
 .include "../../rom/include/defines.s"
 
-PSTARTLO = $2800        ; 4,000,000,000
-PSTARTHI = $EE6B        
+; Memory usage
+;
+; Zero Page
+
 
 POS         = $04 ; bit number of the current prime
 END         = $08 ; Last bit position we will consider
@@ -15,7 +18,15 @@ PRIMES      = $10
 MASK        = $14
 ADDER       = $18
 
+; Bit array starts at end of program
+
+
 .org START
+                ; clear bit arrray
+                jsr clear_bit_array
+                jmp stop
+
+
                 lda #$20
                 sta END
                 lda #$00
@@ -48,6 +59,33 @@ loop:
                 bne loop
 stop:
                 jmp stop
+
+clear_bit_array:
+                ; Set up zero-page pointer
+                LDA #<BIT_ARRAY
+                STA $FB
+                LDA #>BIT_ARRAY
+                STA $FC
+
+                ; Clear memory loop
+                LDA #$00        ; Load accumulator with zero
+
+@clear_loop:
+                STA ($FB)       ; Store zero at current address
+                INC $FB         ; Increment low address
+                BNE @skip_inc   ; If low address did not wrap do not inc high
+                INC $FC         ; Increment high byte of address
+@skip_inc:
+                LDA $FB        ; Check if we've reached START_ROM
+                CMP #<START_ROM
+                BNE @clear_loop
+                LDA $FC
+                CMP #>START_ROM
+                BNE @clear_loop
+
+                RTS
+
+
 
 
 print_prime:
@@ -140,6 +178,6 @@ five_secs_loop:
                 pla
                 rts
 
-
+BIT_ARRAY:      rts
 
 
