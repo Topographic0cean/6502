@@ -3,6 +3,8 @@ CONFIG = ../config
 PROC = ../process
 PROGS = $(patsubst %.s, $(BIN)/%.prg, $(wildcard *.s))
 
+.PRECIOUS: $(BIN)/%.bin
+
 all: $(PROGS)
 
 $(BIN)/%.o: %.s

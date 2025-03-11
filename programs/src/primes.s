@@ -9,35 +9,26 @@
 ; Memory usage
 ;
 ; Zero Page
+;
+NUMBIT       = $04   ; Number of bit of current prime.  Starts at 1 (3)
+CURBIT       = $05   ; Number of bit that we are marking at not prime
+BYTE         = $06   ; Holds address of current 8 bit location of current prime 
+CURBYTE     = $08   ; Holds address of current byte we marking at not prime
+SKIP        = $0A   ; Current prime which is also how many bits to skip when
+                    ; marking not prime bits.  32 bit number
 
-
-POS         = $04 ; bit number of the current prime
-END         = $08 ; Last bit position we will consider
-MARK        = $0C ; Current position to mark as not prime
-PRIMES      = $10
-MASK        = $14
-ADDER       = $18
-
-; Bit array starts at end of program
+; BIT_ARRAY starts at end of program
 
 
 .org START
-                ; clear bit arrray
-                jsr clear_bit_array
-                jmp stop
+                JSR clear_bit_array
 
-
-                lda #$20
-                sta END
-                lda #$00
-                sta POS
-                sta POS+1
-                sta POS+2
-                sta POS+3
-                sta PRIMES
-                sta PRIMES+1
-                sta PRIMES+2
-                sta PRIMES+3
+                LDA #$01
+                STA NUMBIT
+                LDA #<BIT_ARRAY
+                STA BYTE
+                LDA #>BIT_ARRAY
+                STA BYTE+1
 
                 jsr DISPLAY_CLEAR
                 lda #$02
@@ -50,42 +41,41 @@ ADDER       = $18
                 jsr five_secs
 
 loop:
+                jsr calc_skip
                 jsr print_prime
                 jsr mark_non_primes
                 jsr move_to_next_prime
                 jsr five_secs
-                lda POS
-                cmp END
+
+                ; make sure BYTE is not greater that the max memory address
+                
                 bne loop
 stop:
                 jmp stop
 
 clear_bit_array:
-                ; Set up zero-page pointer
+; Sets all bits in the prime array to 0
+; $FB contains the starting address of the array and we set all bits until 
+; we hit the ACIA region
                 LDA #<BIT_ARRAY
                 STA $FB
                 LDA #>BIT_ARRAY
                 STA $FC
-
-                ; Clear memory loop
-                LDA #$00        ; Load accumulator with zero
-
+                LDY #$00
 @clear_loop:
-                STA ($FB)       ; Store zero at current address
+                LDA #$00        ; Load accumulator with zero
+                STA ($FB),Y    ; Store zero at current address
                 INC $FB         ; Increment low address
                 BNE @skip_inc   ; If low address did not wrap do not inc high
                 INC $FC         ; Increment high byte of address
 @skip_inc:
                 LDA $FB        ; Check if we've reached START_ROM
-                CMP #<START_ROM
+                CMP #<ACIA
                 BNE @clear_loop
                 LDA $FC
-                CMP #>START_ROM
+                CMP #>ACIA
                 BNE @clear_loop
-
                 RTS
-
-
 
 
 print_prime:
@@ -99,72 +89,12 @@ print_prime:
                 jsr DISPLAY_NUM
                 rts
 
-get_num:
-                clc
-                lda POS
-                adc POS
-                adc #$03
-                rts
 
 mark_non_primes:
-                ; POS is the bit of the current prime
-                ; set the bit in A
-                lda POS
-                sta MARK
-                jsr get_num
-                cmp #$40
-                bmi mark_non_primes_loop
-                rts
-mark_non_primes_loop:
-                sta ADDER
-                lda MARK
-                jsr set_bit
-                lda MASK
-                ora PRIMES
-                sta PRIMES
-                lda MASK+1
-                ora PRIMES+1
-                sta PRIMES+1
-                lda MASK+2
-                ora PRIMES+2
-                sta PRIMES+2
-                lda MASK+3
-                ora PRIMES+3
-                sta PRIMES+3
-                lda MARK
-                clc
-                adc ADDER
-                cmp END
-                bmi @mark_not_done
-                rts
-@mark_not_done:
-                sta MARK
-                jmp mark_non_primes_loop
-
-set_bit:
-                tax
-                clc
-                lda #$01
-                sta MASK
-                lda #$00
-set_bit_loop:
-                txa
-                beq @set_bit_done 
-                dex
-                rol MASK 
-                jmp set_bit_loop
 @set_bit_done:
                 rts
 
 move_to_next_prime:
-                inc POS
-                lda POS
-                cmp END
-                beq @move_to_next_prime_done
-                jsr set_bit
-                lda MASK
-                bit PRIMES
-                bne move_to_next_prime
 @move_to_next_prime_done:
                 rts
                 

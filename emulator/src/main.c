@@ -106,6 +106,7 @@ int main(int argc, const char *argv[])
             w65c22_tick();
             nanosleep(&asleep, NULL);
             controls->step = 0;
+
         }
         else
         {

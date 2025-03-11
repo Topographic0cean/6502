@@ -2,7 +2,7 @@
 
 import sys
 
-addr = 0x2000
+addr = 0x1000
 
 for line in sys.stdin:
     s = line[:60].split()

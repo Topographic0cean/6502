@@ -428,10 +428,13 @@ static void bpl() {
 
 static void brk() {
     pc++;
+    /*
     push16(pc); //push next instruction address onto stack
     push8(status | FLAG_BREAK); //push CPU status to stack
     setinterrupt(); //set interrupt flag
     pc = (uint16_t)read6502(0xFFFE) | ((uint16_t)read6502(0xFFFF) << 8);
+    */
+   status |= FLAG_BREAK;
 }
 
 static void bvc() {

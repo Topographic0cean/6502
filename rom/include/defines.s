@@ -17,6 +17,9 @@ STORAGE             = $0500     ; $0500 - $0FFF General storage area for RAM pro
 
 START               = $1000     ; Good place to put the RAM program
 
+ACIA                = $5000     ; Start of serial IO
+LCD                 = $6000     ; Start of LCD
+
 START_ROM           = $8000
 DISPLAY_CLEAR  	= $00A1C0
 DISPLAY_HOME  	= $00A1C6
