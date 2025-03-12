@@ -10,15 +10,15 @@
 ;
 ; Zero Page
 ;
-NUMBIT       = $04   ; Number of bit of current prime.  Starts at 1 (3)
-CURBIT       = $05   ; Number of bit that we are marking at not prime
-BYTE         = $06   ; Holds address of current 8 bit location of current prime 
+NUMBIT      = $04   ; Number of bit of current prime.  Starts at 1 (3)
+CURBIT      = $05   ; Number of bit that we are marking at not prime
+BYTE        = $06   ; Holds address of current 8 bit location of current prime 
 CURBYTE     = $08   ; Holds address of current byte we marking at not prime
-SKIP        = $0A   ; Current prime which is also how many bits to skip when
+BASENUM     = $0A   ; Hold odd number value of the first bit of the current byte
+SKIP        = $0E   ; Current prime which is also how many bits to skip when
                     ; marking not prime bits.  32 bit number
 
 ; BIT_ARRAY starts at end of program
-
 
 .org START
                 JSR clear_bit_array
@@ -30,28 +30,32 @@ SKIP        = $0A   ; Current prime which is also how many bits to skip when
                 LDA #>BIT_ARRAY
                 STA BYTE+1
 
-                jsr DISPLAY_CLEAR
-                lda #$02
-                sta HEAP
-                lda #$00
-                sta HEAP+1
-                sta HEAP+2
-                sta HEAP+3
-                jsr DISPLAY_NUM
-                jsr five_secs
+                LDA #$01
+                STA BASENUM
+                LDA #$00
+                STA BASENUM+1
+                STA BASENUM+2
+                STA BASENUM+3
 
+                LDA #$02
+                STA SKIP
+                LDA #$00
+                STA SKIP+1
+                STA SKIP+2
+                STA SKIP+3
+                LDY #$02
 loop:
-                jsr calc_skip
-                jsr print_prime
-                jsr mark_non_primes
-                jsr move_to_next_prime
-                jsr five_secs
-
-                ; make sure BYTE is not greater that the max memory address
-                
-                bne loop
+                PHY
+                JSR print_prime
+                JSR calc_skip
+                JSR move_to_next_prime
+                JSR mark_non_primes
+                JSR five_secs
+                PLY
+                DEY
+                BNE loop
 stop:
-                jmp stop
+                JMP stop
 
 clear_bit_array:
 ; Sets all bits in the prime array to 0
@@ -79,12 +83,14 @@ clear_bit_array:
 
 
 print_prime:
-                jsr DISPLAY_CLEAR
-                jsr get_num
+                JSR DISPLAY_CLEAR
+                LDA SKIP
                 sta HEAP
-                lda #$00
+                LDA SKIP+1
                 sta HEAP+1
+                LDA SKIP+2
                 sta HEAP+2
+                LDA SKIP+3
                 sta HEAP+3
                 jsr DISPLAY_NUM
                 rts
@@ -97,6 +103,36 @@ mark_non_primes:
 move_to_next_prime:
 @move_to_next_prime_done:
                 rts
+
+calc_skip:
+                ; Start with the bit number
+                LDA NUMBIT
+                STA SKIP
+                LDA #$00
+                STA SKIP+1
+                STA SKIP+2
+                STA SKIP+3
+                ; Multiply by 2
+                CLC
+                ROL SKIP
+                ROL SKIP+1
+                ROL SKIP+2
+                ROL SKIP+3
+                ; add base odd number
+                CLC
+                LDA SKIP
+                ADC BASENUM
+                STA SKIP
+                LDA SKIP+1
+                ADC BASENUM+1
+                STA SKIP+1
+                LDA SKIP+2
+                ADC BASENUM+2
+                STA SKIP+2
+                LDA SKIP+3
+                ADC BASENUM+3
+                STA SKIP+3
+                RTS
                 
 five_secs:
                 pha
