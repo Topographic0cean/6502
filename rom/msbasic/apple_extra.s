@@ -96,9 +96,6 @@ USR_FUNC:
         jmp     (FAC+4)
 L29DA:
         jmp     (GOAYINT)
-        brk
-        brk
-        brk
 L29E0:
         pla
         jmp     LFB40

@@ -23,12 +23,10 @@ extern uint8_t sp, a, x, y, status;
 
 void check_instruction()
 {
-    /*
     if (status & FLAG_BREAK) {
         status &= ~FLAG_BREAK;
         controls->pause = 1;
     }
-    */
 }
 
 void initialize(int argc, const char *argv[])

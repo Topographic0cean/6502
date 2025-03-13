@@ -1,7 +1,7 @@
 BIN = ../bin
 CONFIG = ../config
 PROC = ../process
-PROGS = $(patsubst %.s, $(BIN)/%.prg, $(wildcard *.s))
+PROGS = $(patsubst %.s, $(BIN)/%, $(wildcard *.s))
 
 .PRECIOUS: $(BIN)/%.bin
 
@@ -14,7 +14,7 @@ $(BIN)/%.o: %.s
 $(BIN)/%.bin: $(BIN)/%.o
 	ld65 -C $(CONFIG) $< -o $@ 
 
-$(BIN)/%.prg: $(BIN)/%.bin
+$(BIN)/%: $(BIN)/%.bin
 	hexdump -C $< | $(PROC) > $@
 
 PHONY: all
