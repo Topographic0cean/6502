@@ -14,28 +14,7 @@ entrypoints="\
     VIA_CTS \
 "
 
-> include/defines.s cat <<"EOF"
-; RAM address space
-
-; Zero Page
-; $00 - $01     ; 2 bytes for the input buffer
-; $02           ; 1 byte  for the display
-; $0C - $FF     ; MSBASIC usage start
-
-; $0100 - $01FF     stack 
-
-; $0200 - $02FF     unknown 
-
-; $0300 - $03FF     Input buffer for serial line
-
-HEAP                = $0400     ; 256 bytes of general storage area used by ROM
-
-STORAGE             = $0500     ; $0500 - $0FFF General storage area for RAM programs
-
-START               = $1000     ; Good place to put the RAM program
-
-START_ROM           = $8000
-EOF
+cp src/mem.s include/defines.s 
 
 for sub in $entrypoints; do
     addr=$(grep -e "$sub\$" ../rom/msbasic/msbasic.lbl| awk '{print $2}')

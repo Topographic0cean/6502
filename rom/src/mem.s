@@ -4,34 +4,33 @@
 ; RAM address space
 ;
 ; Zero Page
-; $00 - $0B     ; usable
-; $0C - $FF     ; MSBASIC usage start
+READ_PTR        = $00       ; used by the keyboard buffer to store pointers to the 
+WRITE_PTR       = $01       ; character buffer
+PORT            = $02       ; keep track of what PORTA should be.  Since it is used by different
+                            ; functions.  We do not expect them to know what each is doing.
+; Used by Wozmon
+XAML            = $03       ; last opened location low
+XAMH            = $04       ; last opened location high
+STL             = $05       ; store address low
+STH             = $06       ; store address high
+L               = $07       ; Hex value parsing Low
+H               = $08       ; Hex value parsing High
+YSAV            = $09       ; Used to see if hex value is given
+MODE            = $0A       ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
+ZP_MSBASIC      = $0C       ; MSBASIC usage start until end of ZP
 
-; $0100 - $01FF     stack 
+.ifndef STACK
+STACK           = $0100     ; 256 bytes
+.endif
+INPUTBUF        = $0200     ; Used by ACIA to store key presses
+INPUT_BUFFR     = $0300
+SER_INPUT_BUF   = $0300     ; Input buffer for serial line
+HEAP            = $0400     ; 256 bytes of general storage area used by ROM
+STORAGE         = $0500     ; $0500 - $0FFF General storage area for RAM programs
 
-; $0200 - $02FF     unknown 
+START           = $1000     ; Good place to put the RAM program
 
-; $0300 - $03FF     Input buffer for serial line
+ACIA            = $5000
+LCD             = $6000
 
-
-READ_PTR    = $00       ; used by the keyboard buffer to store pointers to the 
-WRITE_PTR   = $01       ; character buffer
-
-PORT        = $02       ; keep track of what PORTA should be.  Since it is used by different
-                        ; functions.  We do not expect them to know what each is doing.
-
-XAML        = $03                            ; last opened location low
-XAMH        = $04                            ; last opened location high
-STL         = $05                            ; store address low
-STH         = $06                            ; store address high
-L           = $07                            ; Hex value parsing Low
-H           = $08                            ; Hex value parsing High
-YSAV        = $09                            ; Used to see if hex value is given
-MODE        = $0A                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
-
-INPUT_BUFFR = $0300
-INPUTBUF    = $0200
-HEAP        = $0400
-
-ACIA        = $5000
-LCD         = $6000
+START_ROM       = $8000

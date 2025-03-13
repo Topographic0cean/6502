@@ -44,7 +44,7 @@ void window_init() {
 }
 
 void windows_status(char* status) {
-    wprintw(serial,status);
+    wprintw(serial,"%s",status);
 }
 
 void window_lcd_clear() {
