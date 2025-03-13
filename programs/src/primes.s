@@ -43,11 +43,12 @@ SKIP        = $0E   ; Current prime which is also how many bits to skip when
                 STA SKIP+1
                 STA SKIP+2
                 STA SKIP+3
-                LDY #$02
+                LDY #$05
 loop:
                 PHY
                 JSR print_prime
                 JSR calc_skip
+                BRK 0
                 JSR move_to_next_prime
                 JSR mark_non_primes
                 JSR five_secs
@@ -101,8 +102,17 @@ mark_non_primes:
                 rts
 
 move_to_next_prime:
+                INC NUMBIT
+                LDA NUMBIT
+                CMP #$08
+                BNE @move_to_next_prime_done
+                LDA #$00
+                STA NUMBIT
+                INC BYTE
+                BNE @move_to_next_prime_done
+                INC BYTE+1
 @move_to_next_prime_done:
-                rts
+                RTS
 
 calc_skip:
                 ; Start with the bit number
