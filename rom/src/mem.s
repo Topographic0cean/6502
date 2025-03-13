@@ -22,9 +22,8 @@ ZP_MSBASIC      = $0C       ; MSBASIC usage start until end of ZP
 .ifndef STACK
 STACK           = $0100     ; 256 bytes
 .endif
-INPUTBUF        = $0200     ; Used by ACIA to store key presses
-INPUT_BUFFR     = $0300
-SER_INPUT_BUF   = $0300     ; Input buffer for serial line
+INPUTBUF        = $0200     ; Used by Wozmon to store key presses
+ACAIA_BUFFER    = $0300     ; Used by ACAIA for keyboard buffering
 HEAP            = $0400     ; 256 bytes of general storage area used by ROM
 STORAGE         = $0500     ; $0500 - $0FFF General storage area for RAM programs
 

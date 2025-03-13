@@ -10,3 +10,4 @@ obj
 tmp
 defines.old
 .vscode
+rom/include/defines.s

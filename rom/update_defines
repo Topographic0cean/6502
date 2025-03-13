@@ -14,6 +14,7 @@ entrypoints="\
     VIA_CTS \
 "
 
+mkdir -p include
 cp src/mem.s include/defines.s 
 
 for sub in $entrypoints; do

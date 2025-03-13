@@ -24,7 +24,7 @@ MONRDKEY:   jsr BUF_SIZE
             beq @no_key
             phx
             ldx READ_PTR
-            lda INPUT_BUFFR, x
+            lda ACAIA_BUFFER, x
             inc READ_PTR
             pha
             jsr BUF_SIZE
@@ -60,7 +60,7 @@ ACIA_READ:
             lda ACIA_STATUS           ; assume ACIA is only interrupt
             lda ACIA_DATA
 WRITE_BUF:  ldx WRITE_PTR
-            sta INPUT_BUFFR, x
+            sta ACAIA_BUFFER, x
             inc WRITE_PTR
             jsr BUF_SIZE
             cmp #$F0
