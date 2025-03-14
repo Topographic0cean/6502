@@ -101,10 +101,12 @@ mark_non_primes:
                 rts
 
 move_to_next_prime:
+                ; increment the bit
                 INC NUMBIT
                 LDA NUMBIT
                 CMP #$08
                 BNE @move_to_next_prime_done
+                ; bit rolled over so increment the address
                 LDA #$00
                 STA NUMBIT
                 CLC
@@ -118,6 +120,18 @@ move_to_next_prime:
                 BNE @move_to_next_prime_done
                 INC BYTE+1
 @move_to_next_prime_done:
+                ; create the bit mask
+                LDA NUMBIT
+                TAX
+                LDA #$01
+@bit_mask_loop:
+                DEX
+                BEQ @test_number
+                ROL
+                jmp @bit_mask_loop
+@test_number:
+                AND (BYTE)
+                BNE move_to_next_prime
                 RTS
 
 calc_skip:
