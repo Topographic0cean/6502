@@ -48,7 +48,6 @@ loop:
                 PHY
                 JSR print_prime
                 JSR calc_skip
-                BRK 0
                 JSR move_to_next_prime
                 JSR mark_non_primes
                 JSR five_secs
@@ -108,6 +107,13 @@ move_to_next_prime:
                 BNE @move_to_next_prime_done
                 LDA #$00
                 STA NUMBIT
+                CLC
+                LDA #$10
+                ADC BASENUM
+                STA BASENUM
+                LDA #$00
+                ADC BASENUM+1
+                STA BASENUM+1
                 INC BYTE
                 BNE @move_to_next_prime_done
                 INC BYTE+1
