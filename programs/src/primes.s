@@ -29,6 +29,10 @@ SKIP        = $0E   ; Current prime which is also how many bits to skip when
                 STA BYTE
                 LDA #>BIT_ARRAY
                 STA BYTE+1
+                
+                LDA #$40
+                LDY #$00
+                STA (BYTE),Y
 
                 LDA #$01
                 STA BASENUM
@@ -97,6 +101,18 @@ print_prime:
 
 
 mark_non_primes:
+                LDA BYTE
+                STA CURBYTE
+                LDA NUMBIT
+                STA CURBIT
+@do_mark:
+                INC CURBYTE
+                BNE @inc_curbyte_done
+                INC CURBYTE+1
+@inc_curbyte_done:
+                LDA CURBYTE+1
+                CMP #$50
+                BNE @do_mark
 @set_bit_done:
                 rts
 
@@ -130,7 +146,9 @@ move_to_next_prime:
                 ROL
                 jmp @bit_mask_loop
 @test_number:
-                AND (BYTE)
+                BRK 0
+                LDY #$00
+                AND (BYTE),Y
                 BNE move_to_next_prime
                 RTS
 
@@ -175,5 +193,3 @@ five_secs_loop:
                 rts
 
 BIT_ARRAY:      rts
-
-
