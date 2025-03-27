@@ -99,11 +99,12 @@ move_to_next_prime:
                 STA NUMBIT
                 CLC
                 INC BYTE
+                LDA BYTE
                 BNE @test_prime_bit
                 INC BYTE+1
 @test_prime_bit:
-                ; create the bit mask
                 LDA NUMBIT
+                ; create the bit mask
                 JSR create_mask
                 LDY #$00
                 LDA MASK
@@ -201,15 +202,18 @@ mark_non_primes:
 create_mask:
                 ; Create a bit mask and store it into MASK
                 ; bit number should be in A
+                BEQ @zero_mask ; bit number is zero so just return 1
                 TAX
                 LDA #$01
 @bit_mask_loop:
-                DEX
-                BEQ @create_mask_done
                 ROL
-                jmp @bit_mask_loop
+                DEX
+                BNE @bit_mask_loop
 @create_mask_done:
                 STA MASK
+                RTS
+@zero_mask:
+                LDA #$01
                 RTS
 
 
@@ -223,4 +227,4 @@ five_secs_loop:
                 pla
                 rts
 
-BIT_ARRAY:      rts
+BIT_ARRAY:      NOP
