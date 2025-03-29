@@ -41,6 +41,7 @@ loop:
                 JSR print_prime
                 JSR move_to_next_prime
                 JSR calc_prime
+                BRK 0
                 JSR mark_non_primes
                 LDA BYTE+1
                 CMP #$50

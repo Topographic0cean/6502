@@ -9,5 +9,6 @@ extern void window_show_state();
 extern void window_shutdown();
 extern void window_mem_forward();
 extern void window_mem_backward();
+extern void window_set_mem();
 extern void window_resize();
 extern void windows_status(char* status);
