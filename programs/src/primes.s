@@ -17,6 +17,9 @@ CURBYTE     = $08   ; Holds address of current byte we marking at not prime
 PRIME       = $0E   ; Current prime which is also how many bits to skip when
                     ; marking not prime bits.  32 bit number
 MASK        = $12   ; Holds current bit mask
+BITADD      = $13   ; Holds the lower three bits of the PRIME to add when
+                    ; skipping through the array
+BYTEADD     = $14   ; Hold the number of bytes to skip.  16 bit number
 
 ; BIT_ARRAY starts at end of program
 
@@ -41,12 +44,11 @@ loop:
                 JSR print_prime
                 JSR move_to_next_prime
                 JSR calc_prime
-                BRK 0
                 JSR mark_non_primes
                 LDA BYTE+1
                 CMP #$50
                 BEQ stop
-                ;JSR five_secs
+                JSR five_secs
                 JMP loop
 stop:
                 JMP stop
@@ -167,35 +169,68 @@ calc_prime:
                 RTS
                 
 mark_non_primes:
-                LDY #$00
+                LDY #$00                ; setup curbit and cur byte
                 LDA NUMBIT
                 STA CURBIT
                 LDA BYTE
                 STA CURBYTE
                 LDA BYTE+1
                 STA CURBYTE+1
+                LDA PRIME               ; setup the add bit and byte
+                AND #$07
+                STA BITADD
+                LDA PRIME
+                STA BYTEADD
+                LDA PRIME+1
+                STA BYTEADD+1
+                LDA PRIME+2
+                STA BYTEADD+2
+                LDA PRIME+3
+                STA BYTEADD+3
+                CLC                     ; move off the lower 3 bits of byte add
+                ROR BYTEADD+3
+                ROR BYTEADD+2
+                ROR BYTEADD+1
+                ROR BYTEADD
+                CLC       
+                ROR BYTEADD+3
+                ROR BYTEADD+2
+                ROR BYTEADD+1
+                ROR BYTEADD
+                CLC                     ; move off the lower 3 bits
+                ROR BYTEADD+3
+                ROR BYTEADD+2
+                ROR BYTEADD+1
+                ROR BYTEADD
 @do_mark:
-                ; make sure we are not at the end
-                LDA CURBYTE+1
+                LDA CURBYTE+1           ; make sure we are not at the end
                 CMP #$50
                 BEQ @set_bit_done
-                LDA CURBIT
-                JSR create_mask
+                BPL @set_bit_done
+                LDA CURBIT              ; create the bit mask for
+                JSR create_mask         ; the current bit number
                 LDA MASK
-                ORA (CURBYTE),Y
+                ORA (CURBYTE),Y         ; apply it to the current byte
                 STA (CURBYTE),Y
-                CLC
-                LDA PRIME
-                AND #$07
+                CLC                     ; skip to next non prime
+                LDA BITADD               
                 ADC CURBIT
                 STA CURBIT
-                CMP #$08
-                BMI @do_mark
-                AND #$07
-                STA CURBIT
+                CMP #$08                ; did we go over 3 bits?
+                BMI @add_upper_prime
+                AND #$07                ; yes so mod 8 the curbit
+                STA CURBIT              ; and add one to curbyte
                 INC CURBYTE
-                BNE @do_mark
+                BNE @add_upper_prime
                 INC CURBYTE+1
+@add_upper_prime:
+                CLC
+                LDA CURBYTE
+                ADC BYTEADD
+                STA CURBYTE
+                LDA CURBYTE+1
+                ADC BYTEADD+1
+                STA CURBYTE+1
                 JMP @do_mark
 @set_bit_done:
                 rts
@@ -215,7 +250,7 @@ create_mask:
                 RTS
 @zero_mask:
                 LDA #$01
-                RTS
+                JMP @create_mask_done
 
 
 five_secs:
