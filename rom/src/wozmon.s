@@ -10,6 +10,10 @@ RESET:      cld
             lda #$1b
             cli 
 
+.ifdef RUN_PRIME
+            jmp STARTPRIME
+.endif
+
 notcr:      cmp #$08              ; backspace?
             beq backspace         ; yes
             cmp #$1b              ; escape
@@ -160,4 +164,5 @@ LOAD:       rts
 .include "hextodec.s"
 .include "vectors.s"
 .include "math.s"
+.include "primes.s"
 .include "lib.s"

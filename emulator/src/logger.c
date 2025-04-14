@@ -28,5 +28,6 @@ void logger_log(int level, char* fmt, ...) {
 }
 
 void logger_close() {
-    fclose(logfile);
+    if (logfile)
+        fclose(logfile);
 }

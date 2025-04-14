@@ -2,9 +2,7 @@
 ; Uses the Sieve of Eratosthenes to print out primes.
 ; 
 ; 
-.setcpu   "65C02"
-.debuginfo
-.include "../../rom/include/defines.s"
+.segment    "ROM"
 
 ; Memory usage
 ;
@@ -21,9 +19,10 @@ BITADD      = $13   ; Holds the lower three bits of the PRIME to add when
                     ; skipping through the array
 BYTEADD     = $14   ; Hold the number of bytes to skip.  16 bit number
 
-; BIT_ARRAY starts at end of program
+BIT_ARRAY   = $2000
+BIT_END     = $5000
 
-.org START
+STARTPRIME:
                 JSR clear_bit_array
 
                 LDA #$00
@@ -46,9 +45,12 @@ loop:
                 JSR calc_prime
                 JSR mark_non_primes
                 LDA BYTE+1
-                CMP #$50
+                CMP #<BIT_END
                 BEQ stop
-                JSR five_secs
+                LDA PRIME
+                EOR BYTE
+                JSR DISPLAY_LEDS
+                JSR delay
                 JMP loop
 stop:
                 JMP stop
@@ -95,7 +97,7 @@ move_to_next_prime:
                 ; increment the bit
                 INC NUMBIT
                 LDA NUMBIT
-                CMP #$08
+                CMP #<BIT_END
                 BNE @test_prime_bit
                 ; bit rolled over so increment the address
                 LDA #$00
@@ -204,7 +206,7 @@ mark_non_primes:
                 ROR BYTEADD
 @do_mark:
                 LDA CURBYTE+1           ; make sure we are not at the end
-                CMP #$50
+                CMP #<BIT_END
                 BEQ @set_bit_done
                 BPL @set_bit_done
                 LDA CURBIT              ; create the bit mask for
@@ -253,14 +255,12 @@ create_mask:
                 JMP @create_mask_done
 
 
-five_secs:
+delay:
                 pha
-                lda #$05
-five_secs_loop:
+                lda #$01
+delay_loop:
                 jsr ONE_SEC_DELAY
                 dec
-                bne five_secs_loop
+                bne delay_loop
                 pla
                 rts
-
-BIT_ARRAY:      NOP

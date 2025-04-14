@@ -18,6 +18,7 @@
 Options *options;
 Control *controls;
 
+
 extern uint16_t pc;
 extern uint8_t sp, a, x, y, status;
 
@@ -59,12 +60,7 @@ void shutdown() {
 }
 
 int handle_controls() {
-    struct timespec asleep;
-    struct timespec mssleep;
-    mssleep.tv_sec = 0;
-    mssleep.tv_nsec = 100000000;
-    asleep.tv_sec = 0;
-    asleep.tv_nsec = options->sleep;
+    static uint32_t ticks = 0;
 
     if (controls->reset == 1) {
         logger_log(LOGGER_IO, "===== reset ===== \n");
@@ -91,14 +87,22 @@ int handle_controls() {
         if (controls->pause == 1)
             window_set_mem();
     }
-    if (controls->pause == 0 || controls->step) {
+    if (controls->pause == 0) {
         step6502();
         w65c22_tick();
-        nanosleep(&asleep, NULL);
+        if (options->sleep > 0 && ticks > options->sleep * 1000) {
+            usleep(10000);
+            ticks = 0;
+        }
+        ticks++;
+    }
+    else if (controls->step) {
+        step6502();
+        w65c22_tick();
         controls->step = 0;
     } else {
         window_show_state();
-        nanosleep(&mssleep, NULL);
+        sleep(1);
     }
     return 1;
 }
