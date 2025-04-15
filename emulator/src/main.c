@@ -90,7 +90,7 @@ int handle_controls() {
     if (controls->pause == 0) {
         step6502();
         w65c22_tick();
-        if (options->sleep > 0 && ticks > options->sleep * 1000) {
+        if (options->sleep > 0 && ticks > options->sleep) {
             usleep(1000);
             ticks = 0;
         }

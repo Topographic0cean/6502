@@ -1,9 +1,9 @@
 ; 
 ; Uses the Sieve of Eratosthenes to print out primes.
 ; 
-; 
-
-.segment    "ROM"
+.setcpu   "65C02"
+.debuginfo
+.include "../../rom/include/defines.s"
 
 ; Memory usage
 ;
@@ -23,7 +23,7 @@ BYTEADD     = $14   ; Hold the number of bytes to skip.  16 bit number
 BIT_ARRAY   = $2000
 BIT_END     = $5000
 
-START_PRIME:
+.org START
                 JSR clear_bit_array
 
                 LDA #$00
@@ -46,7 +46,7 @@ loop:
                 JSR calc_prime
                 JSR mark_non_primes
                 LDA BYTE+1
-                CMP #>BIT_END
+                CMP #$50
                 BEQ stop
                 LDA PRIME
                 EOR BYTE
@@ -54,7 +54,7 @@ loop:
                 JSR delay
                 JMP loop
 stop:
-                JMP START_PRIME
+                JMP stop
 
 clear_bit_array:
 ; Sets all bits in the prime array to 0
@@ -207,7 +207,7 @@ mark_non_primes:
                 ROR BYTEADD
 @do_mark:
                 LDA CURBYTE+1           ; make sure we are not at the end
-                CMP #>BIT_END
+                CMP #$50
                 BEQ @set_bit_done
                 BPL @set_bit_done
                 LDA CURBIT              ; create the bit mask for
@@ -258,7 +258,7 @@ create_mask:
 
 delay:
                 pha
-                lda #$01
+                lda #$05
 delay_loop:
                 jsr ONE_SEC_DELAY
                 dec
