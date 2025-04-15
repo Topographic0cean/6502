@@ -7,7 +7,7 @@ MSB := $(wilcard msbasic/*.s)
 all: rom.bin
 
 rom.bin: $(ASM) $(MSB)
-	make -C msbasic
+	make -C msbasic 
 	@./update_defines
 
 clean:

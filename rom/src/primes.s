@@ -22,7 +22,7 @@ BYTEADD     = $14   ; Hold the number of bytes to skip.  16 bit number
 BIT_ARRAY   = $2000
 BIT_END     = $5000
 
-STARTPRIME:
+START_PRIME:
                 JSR clear_bit_array
 
                 LDA #$00

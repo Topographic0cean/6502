@@ -91,7 +91,7 @@ int handle_controls() {
         step6502();
         w65c22_tick();
         if (options->sleep > 0 && ticks > options->sleep * 1000) {
-            usleep(10000);
+            usleep(1000);
             ticks = 0;
         }
         ticks++;

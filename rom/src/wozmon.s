@@ -4,16 +4,7 @@
 
 .include "mem.s"
 
-RESET:      cld
-            jsr ACIA_SETUP
-            jsr VIA_SETUP
-            lda #$1b
-            cli 
-
-.ifdef RUN_PRIME
-            jmp STARTPRIME
-.endif
-
+START_WOZMON:
 notcr:      cmp #$08              ; backspace?
             beq backspace         ; yes
             cmp #$1b              ; escape
